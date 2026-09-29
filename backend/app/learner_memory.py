@@ -6,6 +6,7 @@ from datetime import datetime
 from .models import LearnerProfile, ConceptMastery, DiagnosticEvidence, InterventionTier
 from .rag_engine import knowledge_engine
 from .config import settings
+from .postgres_memory import concept_memory
 
 logger = logging.getLogger("misconception_os.memory")
 
@@ -72,7 +73,8 @@ class LearnerMemoryManager:
         diagnostic: DiagnosticEvidence,
         tier: InterventionTier,
         current_phase=None,
-        current_topic: Optional[str] = None
+        current_topic: Optional[str] = None,
+        concept_id: Optional[str] = None
     ) -> LearnerProfile:
         profile = self.get_or_create_profile(session_id)
         cid = diagnostic.affected_concept_id
@@ -102,9 +104,11 @@ class LearnerMemoryManager:
             profile.current_phase = current_phase
         if current_topic is not None:
             profile.current_topic = current_topic
+        if concept_id is not None:
+            profile.current_concept_id = concept_id
         
         # Append to conversation log
-        profile.conversation_history.append({
+        turn = {
             "timestamp": datetime.now().isoformat(),
             "user": user_text,
             "tutor": tutor_text,
@@ -113,7 +117,23 @@ class LearnerMemoryManager:
             "evidence": diagnostic.pedagogical_reason,
             "confidence": diagnostic.confidence,
             "is_lucky_guess": diagnostic.is_correct_answer_with_flawed_reasoning
-        })
+        }
+        profile.conversation_history.append(turn)
+
+        # PostgreSQL is the canonical store for concept-scoped conversations.
+        # Keep the compact JSON profile log for backward compatibility and
+        # offline startup, while concept_memory separates each topic thread.
+        if concept_id and current_topic:
+            concept_memory.append_turn(
+                session_id=session_id,
+                concept_id=concept_id,
+                topic=current_topic,
+                user_text=user_text,
+                tutor_text=tutor_text,
+                lesson_phase=getattr(current_phase, "value", str(current_phase or "")),
+                intervention_tier=getattr(tier, "value", str(tier)),
+                diagnostic=diagnostic.model_dump(mode="json"),
+            )
         
         self.save_store()
         return profile

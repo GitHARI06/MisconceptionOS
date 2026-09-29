@@ -1,6 +1,7 @@
 import json
 import os
 import logging
+import re
 from typing import Dict, List, Any, Optional
 from duckduckgo_search import DDGS
 from .config import settings
@@ -86,14 +87,63 @@ Known Student Misconceptions & Pedagogical Counter-Examples:
         return context.strip()
 
     def search_live_grounding(self, query: str, max_results: int = 2) -> str:
-        """Searches live web for pedagogical analogies or factual verification if needed."""
+        """Search live web, then fall back to the approved local physics corpus."""
+        query = (query or "").strip()
+        if not query:
+            return "Enter a physics concept or question to retrieve grounding."
+
         try:
             with DDGS() as ddgs:
                 results = list(ddgs.text(f"physics misconception explanation {query}", max_results=max_results))
                 snippets = [f"[{r.get('title', '')}]: {r.get('body', '')}" for r in results]
-                return "\n".join(snippets)
+                if snippets:
+                    return "\n\n".join(snippets)
         except Exception as e:
-            logger.warning(f"Live web search failed ({e}), falling back to local corpus.")
-            return ""
+            logger.warning(f"Live web search failed ({e}), using local grounding.")
+
+        return self._local_grounding(query)
+
+    def _local_grounding(self, query: str) -> str:
+        """Return relevant, inspectable snippets when live retrieval is empty."""
+        terms = {
+            token.rstrip("s") for token in re.findall(r"[a-z0-9]+", query.lower())
+            if len(token) > 2 and token not in {"what", "are", "the", "and", "for", "why", "how"}
+        }
+        candidates = []
+
+        for unit in self.units.values():
+            unit_text = re.sub(r"[^a-z0-9 ]", " ", " ".join(str(unit.get(k, "")) for k in ["name", "domain", "description"]).lower())
+            unit_score = sum(term in unit_text for term in terms)
+            if unit_score:
+                candidates.append((unit_score, f"[Local approved corpus — {unit.get('name', 'Physics')}]: {unit.get('description', '')}"))
+
+        for concept in self.concepts.values():
+            concept_text = re.sub(r"[^a-z0-9 ]", " ", " ".join([
+                str(concept.get("name", "")),
+                str(concept.get("definition", "")),
+                " ".join(concept.get("key_formulas", [])),
+            ]).lower())
+            score = sum(term in concept_text for term in terms)
+            if score:
+                candidates.append((score + 1, f"[Local concept — {concept.get('name', '')}]: {concept.get('definition', '')} Key formulas: {', '.join(concept.get('key_formulas', []))}"))
+
+        for misconception in self.misconceptions.values():
+            misc_text = re.sub(r"[^a-z0-9 ]", " ", " ".join([
+                str(misconception.get("name", "")),
+                str(misconception.get("description", "")),
+                str(misconception.get("counter_example", "")),
+            ]).lower())
+            score = sum(term in misc_text for term in terms)
+            if score:
+                candidates.append((score, f"[Local misconception — {misconception.get('name', '')}]: {misconception.get('description', '')} Counter-example: {misconception.get('counter_example', '')}"))
+
+        if not candidates:
+            return (
+                "Live search returned no results, and this concept is not yet in the local approved corpus. "
+                "Use the tutor's physics explanation with caution until a source is available."
+            )
+
+        candidates.sort(key=lambda item: item[0], reverse=True)
+        return "\n\n".join(snippet for _, snippet in candidates[:3])
 
 knowledge_engine = KnowledgeRetriever()

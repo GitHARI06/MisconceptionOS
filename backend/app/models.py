@@ -88,6 +88,7 @@ class LearnerProfile(BaseModel):
     learner_name: str = "Student"
     unit_id: str = "physics_mechanics"
     current_topic: Optional[str] = None
+    current_concept_id: Optional[str] = None
     current_phase: LessonPhase = LessonPhase.GREETING
     concept_states: Dict[str, ConceptMastery] = {}
     conversation_history: List[Dict[str, Any]] = []

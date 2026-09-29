@@ -8,6 +8,13 @@ logger = logging.getLogger("misconception_os.policy")
 
 class SocraticPolicyEngine:
     @staticmethod
+    def concept_id_for_topic(topic: Optional[str]) -> Optional[str]:
+        if not topic:
+            return None
+        concept_id = re.sub(r"[^a-z0-9]+", "_", topic.lower()).strip("_")
+        return concept_id[:120] or None
+
+    @staticmethod
     def _extract_topic(text_lower: str, current_topic: Optional[str] = None) -> Optional[str]:
         """Return a readable topic only when the learner actually supplied one."""
         known_topics = [

@@ -24,6 +24,12 @@ Generic conversational AI chatbots immediately spoon-feed direct answers or coll
 ## 🏗️ 2. "Dual-Brain & Tri-Guard" Architecture
 
 ```
+
+### Concept-wise memory persistence
+
+Conversation turns are persisted in PostgreSQL in the `concept_conversations` table. Each row is keyed by `session_id` and a normalized `concept_id`, so thermodynamics, momentum, fields, and other physics topics keep separate learning threads. The tutor loads the active concept's recent turns before diagnosis and generation, while the learner profile retains mastery and diagnostic state.
+
+Configure `DATABASE_URL` in `backend/.env` using `backend/.env.example`. On startup, the API creates the table and index automatically. If PostgreSQL is temporarily unavailable, the app keeps the existing local profile log so the tutor can still boot; once the database is configured, new concept turns are written to PostgreSQL.
 [Learner Voice / Utterance / Attack]
                  │
                  ▼

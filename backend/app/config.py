@@ -5,6 +5,9 @@ class Settings(BaseSettings):
     APP_NAME: str = "MisconceptionOS"
     HOST: str = "127.0.0.1"
     PORT: int = 8000
+    # PostgreSQL is used for concept-scoped conversation persistence. Keep it
+    # explicit so deployments do not silently write learner memory elsewhere.
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
     
     # Local LLM via Ollama
     OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")

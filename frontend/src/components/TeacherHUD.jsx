@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, BrainCircuit, Activity, CheckCircle2, AlertTriangle, HelpCircle, RefreshCw, Send } from 'lucide-react';
+import { ShieldAlert, BrainCircuit, Activity, CheckCircle2, AlertTriangle, HelpCircle, RefreshCw, Send, FileText } from 'lucide-react';
 import { FormattedMathText } from '../utils/katexHelper';
 
 export const TeacherHUD = ({ sessionId, unitId }) => {
@@ -9,6 +9,7 @@ export const TeacherHUD = ({ sessionId, unitId }) => {
   const [overrideValue, setOverrideValue] = useState(0.85);
   const [overrideNote, setOverrideNote] = useState('');
   const [overrideMsg, setOverrideMsg] = useState('');
+  const [reportMsg, setReportMsg] = useState('');
 
   const fetchTeacherData = async () => {
     if (!sessionId) return;
@@ -23,6 +24,29 @@ export const TeacherHUD = ({ sessionId, unitId }) => {
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleExtractReport = async () => {
+    if (!data) return;
+    try {
+      const response = await fetch(`/api/teacher/report/${encodeURIComponent(sessionId)}`);
+      if (!response.ok) throw new Error('Report generation failed');
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `learnable-physics-evidence-${data.session_id || 'session'}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      setReportMsg('PDF evidence report downloaded successfully.');
+      setTimeout(() => setReportMsg(''), 4000);
+    } catch (error) {
+      console.error(error);
+      setReportMsg('Unable to generate the PDF report. Please refresh and try again.');
+      setTimeout(() => setReportMsg(''), 5000);
     }
   };
 
@@ -91,15 +115,31 @@ export const TeacherHUD = ({ sessionId, unitId }) => {
             </p>
           </div>
         </div>
-        <button
-          onClick={fetchTeacherData}
-          disabled={loading}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExtractReport}
+            disabled={!data}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg border border-teal-500/40 transition"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            Extract Report
+          </button>
+          <button
+            onClick={fetchTeacherData}
+            disabled={loading}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </div>
       </div>
+
+      {reportMsg && (
+        <div className="p-3 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs rounded-xl font-mono">
+          {reportMsg}
+        </div>
+      )}
 
       {/* Grid: Knowledge Components Mastery */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
