@@ -19,7 +19,49 @@ INJECTION_PATTERNS = [
     r"i\s+have\s+an\s+exam\s+in\s+2\s+mins.*tell\s+me"
 ]
 
+# High-recall vocabulary for a physics boundary. Interdisciplinary terms are
+# deliberately included: atmospheric pollution, climate, aerosols, medical
+# imaging, materials, and chemistry-adjacent questions can all have a genuine
+# physics framing.
+PHYSICS_ANCHORS = {
+    "physics", "mechanics", "motion", "kinematic", "dynamic", "force", "mass",
+    "momentum", "impulse", "velocity", "acceleration", "displacement", "friction",
+    "gravity", "gravitation", "orbit", "projectile", "energy", "work", "power",
+    "heat", "temperature", "thermal", "thermodynamic", "entropy", "enthalpy",
+    "pressure", "fluid", "viscosity", "buoyancy", "wave", "frequency", "sound",
+    "resonance", "oscillation", "optics", "light", "photon", "reflection", "refraction",
+    "lens", "mirror", "electric", "charge", "voltage", "current", "resistance",
+    "circuit", "magnetic", "magnetism", "field", "electromagnetic", "radiation",
+    "relativity", "quantum", "atomic", "nuclear", "particle", "plasma", "semiconductor",
+    "laser", "photoelectric", "cosmology", "astrophysics", "astronomy", "space", "star",
+    "atmosphere", "air pollution", "pollution", "aerosol", "particulate", "smog",
+    "climate", "weather", "greenhouse", "diffusion", "drag", "combustion", "material",
+    "elasticity", "crystal", "fluid dynamics", "biophysics", "medical imaging", "ultrasound",
+    "mri", "radiography", "geophysics", "seismology", "acoustic", "soundproof",
+}
+
+CLEARLY_NON_PHYSICS = {
+    "recipe", "cook", "cooking", "poem", "song lyrics", "lyrics", "politics", "election",
+    "president", "world war", "history essay", "stock market", "cryptocurrency", "blockchain",
+    "sql query", "react component", "javascript", "python code", "programming", "translate",
+    "write my email", "relationship advice", "medical diagnosis", "legal advice",
+}
+
 class SafetyGuardrail:
+    @staticmethod
+    def is_physics_query(user_text: str) -> bool:
+        """Fast, high-recall physics boundary with interdisciplinary coverage."""
+        text = re.sub(r"[^a-z0-9]+", " ", (user_text or "").lower()).strip()
+        if not text:
+            return True
+        if any(marker in text for marker in CLEARLY_NON_PHYSICS):
+            return any(anchor in text for anchor in PHYSICS_ANCHORS)
+        if any(anchor in text for anchor in PHYSICS_ANCHORS):
+            return True
+        # Permit normal classroom front-door language; the next turn still
+        # needs a physics anchor before a lesson is started.
+        return text in {"hi", "hello", "hey", "good morning", "good afternoon", "good evening", "start", "begin"}
+
     @staticmethod
     def detect_prompt_injection(user_text: str) -> Tuple[bool, str]:
         """Detects adversarial jailbreak attempts and returns appropriate deflection."""

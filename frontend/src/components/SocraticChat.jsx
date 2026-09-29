@@ -229,7 +229,7 @@ export const SocraticChat = ({ sessionId, challenge, unit, onStateUpdate }) => {
               Approved Knowledge Scope
             </div>
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              Tutor is mathematically bounded to classical Newtonian definitions. Out-of-scope queries will be transparently deflected.
+              Tutor is bounded to physics and physics-connected interdisciplinary questions. Clearly unrelated requests will be transparently deflected.
             </p>
           </div>
         </div>

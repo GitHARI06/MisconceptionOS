@@ -29,6 +29,7 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
   const speechArmedAtRef = useRef(0);
   const interruptionHandlerRef = useRef(null);
   const processingRef = useRef(false);
+  const autoHandsFreeRef = useRef(false);
   const spokenTextRef = useRef('');
 
   const stopRecognition = () => {
@@ -178,6 +179,9 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
           speakingRef.current = false;
           stopRecognition();
           setOrbState('idle');
+          if (autoHandsFreeRef.current && micStreamRef.current && !processingRef.current) {
+            window.setTimeout(() => startListening(true), 120);
+          }
         };
         audioPlayerRef.current.onerror = () => fallbackBrowserTTS(text);
         audioPlayerRef.current.play().catch(e => {
@@ -221,6 +225,9 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
       speakingRef.current = false;
       stopRecognition();
       setOrbState('idle');
+      if (autoHandsFreeRef.current && micStreamRef.current && !processingRef.current) {
+        window.setTimeout(() => startListening(true), 120);
+      }
     };
     utterance.onerror = () => {
       speakingRef.current = false;
@@ -271,8 +278,9 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
     };
   }, [autoVoice]);
 
-  const startListening = async () => {
+  const startListening = async (skipBootReplay = false) => {
     try {
+      if (mediaRecorderRef.current?.state === 'recording') return;
       if (!hasStarted) {
         setHasStarted(true);
         hasStartedRef.current = true;
@@ -281,10 +289,10 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
       audioPlayerRef.current.pause();
 
       // A browser gesture unlocks media playback after an autoplay block.
-      if (bootVoicePending && lastAudioB64 && autoVoice) {
+      if (!skipBootReplay && bootVoicePending && lastAudioB64 && autoVoice) {
         setBootVoicePending(false);
         speakText("Good morning, welcome to learning. What shall we learn today?", lastAudioB64);
-      } else if (bootVoicePending && autoVoice) {
+      } else if (!skipBootReplay && bootVoicePending && autoVoice) {
         setBootVoicePending(false);
         fallbackBrowserTTS("Good morning, welcome to learning. What shall we learn today?");
       }
@@ -349,6 +357,7 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
     audioPlayerRef.current.currentTime = 0;
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     stopRecognition();
+    setOrbState('listening');
     setLiveTranscript('Listening for your interruption…');
     // Reuse the noise-suppressed stream and let the normal silence detector
     // finish the new utterance automatically.
@@ -425,6 +434,49 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
   };
 
   interruptionHandlerRef.current = interruptTutor;
+
+  // Ask for the microphone during boot. Browsers may still show a one-time
+  // permission prompt, but after approval the learner can use the tutor
+  // hands-free from the first greeting onward.
+  useEffect(() => {
+    let cancelled = false;
+    const prepareHandsFreeMic = async () => {
+      if (!navigator.mediaDevices?.getUserMedia) return;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            channelCount: 1,
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          }
+        });
+        if (cancelled) {
+          stream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+        micStreamRef.current = stream;
+        autoHandsFreeRef.current = true;
+        hasStartedRef.current = true;
+        setHasStarted(true);
+        if (speakingRef.current) {
+          startRecognition();
+          startVoiceActivityMonitor(stream, () => {
+            if (speakingRef.current && Date.now() >= speechArmedAtRef.current) beginBargeIn();
+          });
+        }
+      } catch (error) {
+        console.warn('Hands-free microphone permission unavailable:', error);
+      }
+    };
+    prepareHandsFreeMic();
+    return () => {
+      cancelled = true;
+      stopVoiceActivityMonitor();
+      micStreamRef.current?.getTracks().forEach((track) => track.stop());
+      micStreamRef.current = null;
+    };
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-140px)] max-w-3xl mx-auto px-4 py-8 text-center select-none space-y-8 animate-in fade-in duration-500">

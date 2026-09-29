@@ -49,18 +49,10 @@ class KnowledgeRetriever:
         return [m for m in self.misconceptions.values() if m.get("concept_id") == concept_id]
         
     def is_in_scope(self, query: str, unit_id: str = "physics_mechanics") -> bool:
-        """Determines if the topic is within the bounded unit scope."""
-        # Simple high-speed keyword boundary check + semantic check
-        out_of_scope_keywords = [
-            "quantum", "schrodinger", "relativity", "black hole", "string theory",
-            "organic chemistry", "photosynthesis", "world war", "french revolution",
-            "stock market", "cryptocurrency", "blockchain", "sql query", "react component"
-        ]
-        q_lower = query.lower()
-        for kw in out_of_scope_keywords:
-            if kw in q_lower:
-                return False
-        return True
+        """Determine whether a query has a physics framing."""
+        # Imported lazily to avoid a module cycle during knowledge-base boot.
+        from .safety_guard import SafetyGuardrail
+        return SafetyGuardrail.is_physics_query(query)
 
     def retrieve_grounded_context(self, concept_id: str) -> str:
         """Constructs grounded reference context from local approved corpus."""

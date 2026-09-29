@@ -117,7 +117,36 @@ async def process_student_turn(submission: StudentInput):
             is_out_of_scope=False
         )
 
-    # 3. (Scope guard removed — FSM handles any STEM topic via classroom lifecycle)
+    # 3. Physics-only boundary with an interdisciplinary physics allowance.
+    # For example, air pollution is accepted because atmospheric flow,
+    # particles, diffusion, radiation, and thermodynamics are physics topics.
+    if not SafetyGuardrail.is_physics_query(user_text):
+        scope_msg = (
+            "I’m focused on physics, so I can help when a question connects to motion, forces, energy, "
+            "heat, fluids, waves, light, electricity, fields, radiation, particles, or related physical systems. "
+            "Could you reframe your question through a physics lens?"
+        )
+        audio_b64 = await synthesize_speech_base64(scope_msg)
+        return SocraticTurnResult(
+            session_id=session_id,
+            user_utterance=user_text,
+            tutor_text=scope_msg,
+            audio_base64=audio_b64,
+            lesson_phase=LessonPhase.GREETING,
+            intervention_tier=InterventionTier.DIAGNOSTIC_PROBE,
+            diagnostic=DiagnosticEvidence(
+                category=DiagnosticCategory.INSUFFICIENT_EVIDENCE,
+                affected_concept_id="physics_scope_guard",
+                affected_concept_name="Physics Scope Boundary",
+                confidence=1.0,
+                evidence_quote=user_text,
+                pedagogical_reason="The query did not contain a recognizable physics or physics-interdisciplinary framing.",
+                reasoning_soundness_score=0.0,
+            ),
+            leakage_check_passed=True,
+            is_prompt_injection=False,
+            is_out_of_scope=True,
+        )
 
     # 4. Retrieve persistent profile & conversation history
     profile = learner_memory.get_or_create_profile(session_id, submission.unit_id)
