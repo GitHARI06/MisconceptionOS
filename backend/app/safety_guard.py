@@ -31,7 +31,7 @@ PHYSICS_ANCHORS = {
     "pressure", "fluid", "viscosity", "buoyancy", "wave", "frequency", "sound",
     "resonance", "oscillation", "optics", "light", "photon", "reflection", "refraction",
     "lens", "mirror", "electric", "charge", "voltage", "current", "resistance",
-    "circuit", "magnetic", "magnetism", "field", "electromagnetic", "radiation",
+    "circuit", "ohm", "ohms", "magnetic", "magnetism", "field", "electromagnetic", "radiation",
     "relativity", "quantum", "atomic", "nuclear", "particle", "plasma", "semiconductor",
     "laser", "photoelectric", "cosmology", "astrophysics", "astronomy", "space", "star",
     "atmosphere", "air pollution", "pollution", "aerosol", "particulate", "smog",
@@ -47,6 +47,12 @@ CLEARLY_NON_PHYSICS = {
     "write my email", "relationship advice", "medical diagnosis", "legal advice",
 }
 
+CONTEXTUAL_LEARNER_REPLIES = {
+    "i don't know", "i dont know", "not sure", "no idea", "confused",
+    "same time", "at the same time", "together", "because", "i think",
+    "my answer", "yes", "no", "okay", "ok", "another example", "i understand",
+}
+
 class SafetyGuardrail:
     @staticmethod
     def is_physics_query(user_text: str) -> bool:
@@ -57,6 +63,10 @@ class SafetyGuardrail:
         if any(marker in text for marker in CLEARLY_NON_PHYSICS):
             return any(anchor in text for anchor in PHYSICS_ANCHORS)
         if any(anchor in text for anchor in PHYSICS_ANCHORS):
+            return True
+        if any(reply in text for reply in CONTEXTUAL_LEARNER_REPLIES):
+            # Short answers inherit the physics scope from the active lesson;
+            # rejecting them here would prevent diagnosis of misconceptions.
             return True
         # Permit normal classroom front-door language; the next turn still
         # needs a physics anchor before a lesson is started.

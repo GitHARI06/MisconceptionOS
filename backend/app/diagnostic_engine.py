@@ -44,6 +44,25 @@ class DiagnosticEngine:
         text_lower = student_text.lower().strip()
         last_tutor_turn = conversation_history[-1]["tutor"].lower() if conversation_history else ""
 
+        # Correct outcome + incorrect causal explanation: explicitly retain
+        # the lucky-guess flag so mastery cannot be granted from the matching
+        # final answer alone.
+        if (
+            ("same time" in text_lower or "at the same time" in text_lower)
+            and any(marker in text_lower for marker in ["round", "spherical", "size doesn't", "size does not"])
+        ):
+            return DiagnosticEvidence(
+                category=DiagnosticCategory.OVERGENERALIZATION,
+                affected_concept_id="gravitational_acceleration_freefall",
+                affected_concept_name="Gravitational Acceleration in Vacuum",
+                confidence=0.98,
+                evidence_quote=student_text,
+                pedagogical_reason="The learner reached the correct equal-arrival conclusion but attributed it to shape or size instead of shared gravitational acceleration and the cancellation of mass in a = F/m.",
+                detected_misconception_id="PHYS_MISC_02",
+                reasoning_soundness_score=0.15,
+                is_correct_answer_with_flawed_reasoning=True,
+            )
+
         # Context Check: Did tutor ask about deep space probe / inertia?
         if "spacecraft" in last_tutor_turn or "gliding" in last_tutor_turn or "voyager" in last_tutor_turn or "which law" in last_tutor_turn:
             if "first" in text_lower or "1st" in text_lower or "inertia" in text_lower or "1" in text_lower:
@@ -121,6 +140,9 @@ class DiagnosticEngine:
         conversation_history: List[Dict[str, Any]] = []
     ) -> DiagnosticEvidence:
         """Multi-turn cognitive diagnosis maintaining full dialogue context."""
+        high_confidence_case = cls._multi_turn_heuristic(student_text, conversation_history)
+        if high_confidence_case.is_correct_answer_with_flawed_reasoning:
+            return high_confidence_case
         context_str = ""
         for turn in conversation_history[-3:]:
             context_str += f"Tutor: {turn.get('tutor', '')}\nStudent: {turn.get('user', '')}\n"

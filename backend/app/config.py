@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     # PostgreSQL is used for concept-scoped conversation persistence. Keep it
     # explicit so deployments do not silently write learner memory elsewhere.
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+    AUTH_SECRET: str = os.getenv("AUTH_SECRET", "misconceptionos-dev-auth-secret-change-me")
     
     # Local LLM via Ollama
     OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")

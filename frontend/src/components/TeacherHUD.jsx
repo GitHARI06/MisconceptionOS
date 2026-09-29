@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, BrainCircuit, Activity, CheckCircle2, AlertTriangle, HelpCircle, RefreshCw, Send, FileText } from 'lucide-react';
+import { ShieldAlert, BrainCircuit, Activity, CheckCircle2, AlertTriangle, HelpCircle, RefreshCw, Send, FileText, ClipboardCheck, CalendarDays } from 'lucide-react';
 import { FormattedMathText } from '../utils/katexHelper';
 
 export const TeacherHUD = ({ sessionId, unitId }) => {
@@ -143,7 +143,7 @@ export const TeacherHUD = ({ sessionId, unitId }) => {
 
       {/* Grid: Knowledge Components Mastery */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {data && data.concept_states && Object.values(data.concept_states).map((c) => {
+        {data && data.concept_states && Object.values(data.concept_states).filter((c) => c.total_attempts > 0 || c.recovery_verified || (c.misconceptions_logged && c.misconceptions_logged.length > 0)).map((c) => {
           const masteryPct = Math.round(c.mastery_prob * 100);
           return (
             <div key={c.concept_id} className="p-4 bg-slate-900/90 border border-slate-800 rounded-xl space-y-3">
@@ -195,6 +195,76 @@ export const TeacherHUD = ({ sessionId, unitId }) => {
             </div>
           );
         })}
+      </div>
+
+      {/* Concept Quiz Results & Adaptive Study Plans */}
+      <div className="p-5 bg-slate-900 border border-slate-800 rounded-2xl space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
+              <ClipboardCheck className="w-4 h-4 text-cyan-400" />
+              Concept Quiz Results & Study Plans
+            </h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Quiz evidence is linked to the learned concept and used to create an adaptive plan based on the learner's available study time.
+            </p>
+          </div>
+          <span className="text-[11px] font-mono text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-2 py-1">
+            Default: 1 hr/day
+          </span>
+        </div>
+
+        {data && data.quiz_attempts && data.quiz_attempts.length > 0 ? (
+          <div className="space-y-3">
+            {data.quiz_attempts.map((attempt, idx) => {
+              const percentage = Math.round((attempt.score / Math.max(attempt.total, 1)) * 100);
+              const schedule = attempt.study_plan && Array.isArray(attempt.study_plan.schedule)
+                ? attempt.study_plan.schedule
+                : [];
+              return (
+                <div key={`${attempt.concept_id}-${attempt.created_at}-${idx}`} className="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-3">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <h4 className="text-sm font-semibold text-slate-100">{attempt.topic}</h4>
+                      <p className="text-[11px] text-slate-500 font-mono mt-1">
+                        {attempt.created_at ? new Date(attempt.created_at).toLocaleString() : 'Recent attempt'} • {attempt.hours_per_day} hr/day
+                      </p>
+                    </div>
+                    <div className={`text-sm font-bold px-2.5 py-1 rounded-lg border ${percentage >= 70 ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30' : 'text-amber-300 bg-amber-500/10 border-amber-500/30'}`}>
+                      {attempt.score}/{attempt.total} ({percentage}%)
+                    </div>
+                  </div>
+
+                  {attempt.study_plan && (
+                    <div className="p-3 bg-teal-950/20 border border-teal-900/40 rounded-lg">
+                      <div className="flex items-center gap-2 text-teal-300 text-xs font-semibold">
+                        <CalendarDays className="w-3.5 h-3.5" />
+                        {attempt.study_plan.title || 'Adaptive study plan'}
+                        {attempt.study_plan.duration_days ? ` • ${attempt.study_plan.duration_days} days` : ''}
+                      </div>
+                      {attempt.study_plan.goal && <p className="text-xs text-slate-300 mt-1">{attempt.study_plan.goal}</p>}
+                      {schedule.length > 0 && (
+                        <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {schedule.slice(0, 6).map((day, dayIndex) => (
+                            <div key={`${day.day || dayIndex}-${dayIndex}`} className="p-2 bg-slate-950/70 border border-slate-800 rounded-lg text-[11px]">
+                              <div className="text-cyan-300 font-mono">Day {day.day || dayIndex + 1} • {day.minutes || 60} min</div>
+                              <div className="text-slate-200 mt-1">{day.focus || 'Concept practice'}</div>
+                              {day.checkpoint && <div className="text-slate-500 mt-1">Checkpoint: {day.checkpoint}</div>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-6 text-slate-500 text-xs font-mono border border-dashed border-slate-800 rounded-xl">
+            Complete a concept quiz in the Quiz tab to add score evidence and an adaptive study plan here.
+          </div>
+        )}
       </div>
 
       {/* Evidence-Backed Diagnostic History Timeline */}
@@ -270,7 +340,7 @@ export const TeacherHUD = ({ sessionId, unitId }) => {
               className="w-full bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded-lg p-2 focus:ring-1 focus:ring-teal-500 focus:outline-none"
             >
               <option value="">Select Concept...</option>
-              {data && data.concept_states && Object.values(data.concept_states).map(c => (
+              {data && data.concept_states && Object.values(data.concept_states).filter((c) => c.total_attempts > 0 || c.recovery_verified || (c.misconceptions_logged && c.misconceptions_logged.length > 0)).map(c => (
                 <option key={c.concept_id} value={c.concept_id}>{c.concept_name}</option>
               ))}
             </select>

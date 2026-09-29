@@ -41,23 +41,12 @@ class LearnerMemoryManager:
 
     def get_or_create_profile(self, session_id: str, unit_id: str = "physics_mechanics") -> LearnerProfile:
         if session_id not in self.profiles:
-            # Initialize with concepts for the unit
-            concepts = knowledge_engine.get_unit_concepts(unit_id)
-            initial_states = {}
-            for c in concepts:
-                initial_states[c["id"]] = ConceptMastery(
-                    concept_id=c["id"],
-                    concept_name=c["name"],
-                    mastery_prob=0.15,
-                    total_attempts=0,
-                    correct_reasonings=0,
-                    misconceptions_logged=[],
-                    recovery_verified=False
-                )
             self.profiles[session_id] = LearnerProfile(
                 session_id=session_id,
                 unit_id=unit_id,
-                concept_states=initial_states,
+                # Do not pre-populate the HUD with curriculum/mock concepts.
+                # A state is created only when the learner produces evidence.
+                concept_states={},
                 conversation_history=[],
                 current_tier=InterventionTier.DIAGNOSTIC_PROBE,
                 stuckness_turn_count=0
@@ -79,6 +68,17 @@ class LearnerMemoryManager:
         profile = self.get_or_create_profile(session_id)
         cid = diagnostic.affected_concept_id
         
+        if cid and cid not in profile.concept_states:
+            profile.concept_states[cid] = ConceptMastery(
+                concept_id=cid,
+                concept_name=current_topic or cid.replace("_", " ").title(),
+                mastery_prob=0.15,
+                total_attempts=0,
+                correct_reasonings=0,
+                misconceptions_logged=[],
+                recovery_verified=False,
+            )
+
         if cid in profile.concept_states:
             cstate = profile.concept_states[cid]
             cstate.total_attempts += 1

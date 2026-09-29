@@ -36,6 +36,16 @@ class StudentInput(BaseModel):
     current_phase: Optional[LessonPhase] = None
     topic: Optional[str] = None
 
+class RegisterRequest(BaseModel):
+    username: str
+    email: str
+    password: str
+    class_level: str
+
+class LoginRequest(BaseModel):
+    identity: str
+    password: str
+
 class DiagnosticEvidence(BaseModel):
     category: DiagnosticCategory
     affected_concept_id: str

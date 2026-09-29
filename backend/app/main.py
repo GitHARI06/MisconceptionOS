@@ -2,7 +2,7 @@ import logging
 import uuid
 from io import BytesIO
 from typing import Dict, Any, Optional
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Header
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -10,7 +10,8 @@ from pydantic import BaseModel
 from .config import settings
 from .models import (
     StudentInput, SocraticTurnResult, DiagnosticEvidence, DiagnosticCategory,
-    InterventionTier, LearnerProfile, StressTestEvaluation, LessonPhase
+    InterventionTier, LearnerProfile, StressTestEvaluation, LessonPhase,
+    RegisterRequest, LoginRequest
 )
 from .audio_service import transcribe_audio_base64, synthesize_speech_base64
 from .rag_engine import knowledge_engine
@@ -21,6 +22,8 @@ from .generator import SocraticGenerator
 from .learner_memory import learner_memory
 from .postgres_memory import concept_memory
 from .stress_test_runner import StressTestRunner
+from .auth_service import account_service
+from .quiz_service import quiz_service
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("misconception_os.main")
@@ -47,6 +50,72 @@ def root():
         "version": "1.0.0",
         "track": "Yuva Megathon 2026 - Domain 02: Large Language Models"
     }
+
+@app.post("/api/auth/register")
+def register_student(request: RegisterRequest):
+    if not account_service.enabled:
+        raise HTTPException(status_code=503, detail="Account storage is not available.")
+    try:
+        user = account_service.create_account(
+            request.username, request.email, request.password, request.class_level
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.exception("Account registration failed")
+        raise HTTPException(status_code=503, detail="Unable to create the account right now.") from exc
+    return {"user": account_service.public_user(user), "token": account_service.issue_token(user)}
+
+@app.post("/api/auth/login")
+def login_student(request: LoginRequest):
+    if not account_service.enabled:
+        raise HTTPException(status_code=503, detail="Account storage is not available.")
+    try:
+        user = account_service.authenticate(request.identity, request.password)
+    except Exception as exc:
+        logger.exception("Account login failed")
+        raise HTTPException(status_code=503, detail="Unable to sign in right now.") from exc
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid username/email or password.")
+    return {"user": user, "token": account_service.issue_token(user)}
+
+@app.get("/api/auth/me")
+def current_student(authorization: Optional[str] = Header(default=None)):
+    if not authorization or not authorization.lower().startswith("bearer "):
+        raise HTTPException(status_code=401, detail="Authentication required.")
+    user = account_service.user_from_token(authorization.split(" ", 1)[1].strip())
+    if not user:
+        raise HTTPException(status_code=401, detail="Session expired. Please sign in again.")
+    return {"user": user}
+
+@app.get("/api/quiz/{session_id}")
+def get_concept_quizzes(session_id: str):
+    """Generate/cache one quiz for every concept the learner has explored."""
+    conversations = concept_memory.get_conversations(session_id)
+    quizzes = []
+    for concept_id, turns in conversations.items():
+        if not turns:
+            continue
+        topic = turns[-1].get("topic") or concept_id.replace("_", " ").title()
+        dialogue = "\n".join(f"Student: {turn.get('user', '')}\nTutor: {turn.get('tutor', '')}" for turn in turns[-8:])
+        quizzes.append(quiz_service.get_or_create_quiz(session_id, concept_id, topic, dialogue))
+    return {"session_id": session_id, "quizzes": quizzes}
+
+@app.post("/api/quiz/submit")
+def submit_concept_quiz(payload: Dict[str, Any]):
+    try:
+        return quiz_service.submit(
+            session_id=str(payload.get("session_id", "")),
+            concept_id=str(payload.get("concept_id", "")),
+            answers=[int(answer) for answer in payload.get("answers", [])],
+            hours_per_day=float(payload.get("hours_per_day", 1.0)),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+@app.get("/api/quiz/attempts/{session_id}")
+def get_quiz_attempts(session_id: str):
+    return {"session_id": session_id, "attempts": quiz_service.attempts(session_id)}
 
 @app.get("/api/curriculum/challenges")
 def get_challenges(unit_id: str = "physics_mechanics"):
@@ -261,7 +330,8 @@ def get_teacher_view(session_id: str):
         "stuckness_count": profile.stuckness_turn_count,
         "active_misconception_id": profile.active_misconception_id,
         "total_turns": len(profile.conversation_history),
-        "concept_conversations": concept_memory.get_conversations(session_id)
+        "concept_conversations": concept_memory.get_conversations(session_id),
+        "quiz_attempts": quiz_service.attempts(session_id)
     }
 
 @app.get("/api/teacher/concept-conversations/{session_id}")
