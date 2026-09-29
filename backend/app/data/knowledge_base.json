@@ -1,0 +1,162 @@
+{
+  "units": [
+    {
+      "id": "physics_mechanics",
+      "name": "Newtonian Mechanics & Kinematics",
+      "domain": "Physics",
+      "description": "Classical mechanics: Inertia, Newton's 3 laws, gravitation in vacuum, and projectile acceleration.",
+      "concepts": [
+        {
+          "id": "newton_first_law_inertia",
+          "name": "Newton's 1st Law (Inertia)",
+          "prerequisites": ["acceleration_concept"],
+          "definition": "An object in motion continues at constant velocity unless acted upon by a net external force (\\Sigma F = 0 \\iff a = 0). No force is required to sustain motion.",
+          "key_formulas": ["\\Sigma F = 0 \\iff a = 0", "v = \\text{constant}"]
+        },
+        {
+          "id": "gravitational_acceleration_freefall",
+          "name": "Freefall in Vacuum",
+          "prerequisites": ["newton_second_law_force_accel"],
+          "definition": "In vacuum, all masses fall with identical acceleration g = 9.8 m/s^2 independent of mass, as gravitational force and inertial resistance scale equally.",
+          "key_formulas": ["F_g = mg", "a = \\frac{F}{m} = g", "g = 9.8\\text{ m/s}^2"]
+        },
+        {
+          "id": "acceleration_concept",
+          "name": "Instantaneous Acceleration",
+          "prerequisites": ["displacement_velocity"],
+          "definition": "Acceleration is the time rate of change of velocity (a = dv/dt). An object can have zero instantaneous velocity and non-zero acceleration simultaneously.",
+          "key_formulas": ["a = \\frac{dv}{dt}", "v_f = v_i + at"]
+        },
+        {
+          "id": "newton_second_law_force_accel",
+          "name": "Newton's 2nd Law (F = ma)",
+          "prerequisites": ["acceleration_concept"],
+          "definition": "Net external force produces proportional acceleration (\\Sigma F = m * a). Net force causes change in velocity, never constant velocity.",
+          "key_formulas": ["\\Sigma F_{net} = m \\cdot a"]
+        }
+      ],
+      "misconception_library": [
+        {
+          "id": "PHYS_MISC_01",
+          "concept_id": "newton_first_law_inertia",
+          "name": "Force Needed to Sustain Motion",
+          "category": "wrong_rule_definition",
+          "description": "Believing constant velocity requires a continuous forward pushing force.",
+          "counter_example": "Voyager 1 deep space probe cruising at 38,000 mph with engines completely powered off.",
+          "scaffold_hints": [
+            "What does Newton's First Law state about an object when the net external force is zero?",
+            "If friction and air resistance are zero, what force is needed to keep an object sliding?",
+            "Distinguish between what is required to change motion (acceleration) vs what happens with no force (constant velocity)."
+          ]
+        },
+        {
+          "id": "PHYS_MISC_02",
+          "concept_id": "gravitational_acceleration_freefall",
+          "name": "Heavier Objects Accelerate Faster in Vacuum",
+          "category": "overgeneralization",
+          "description": "Confusing greater gravitational force (F=mg) with greater acceleration (a=g).",
+          "counter_example": "Apollo 15 astronaut dropping a heavy hammer and a light feather simultaneously on the Moon.",
+          "scaffold_hints": [
+            "Earth pulls a 10kg mass with 10x more force than a 1kg mass. But according to F=ma, what does mass also resist?",
+            "Calculate acceleration: a = F_net / m. Substitute F_net = m*g. What happens to mass m in the equation?",
+            "Greater gravitational pull is exactly balanced by greater inertia (resistance to acceleration)."
+          ]
+        },
+        {
+          "id": "PHYS_MISC_03",
+          "concept_id": "acceleration_concept",
+          "name": "Zero Acceleration at Vertical Peak",
+          "category": "wrong_rule_definition",
+          "description": "Believing that because velocity is temporarily 0 at the peak, acceleration must also be 0.",
+          "counter_example": "If acceleration were 0 at the peak, the ball would freeze and float in the air permanently!",
+          "scaffold_hints": [
+            "What force is still pulling downwards on the ball when it reaches the highest point?",
+            "Acceleration is the rate of change of velocity. Is velocity staying at zero, or changing direction?",
+            "Gravity continues to act downwards at g = 9.8 m/s^2 even at the momentary turning point."
+          ]
+        }
+      ],
+      "diagnostic_challenges": [
+        {
+          "id": "CHALLENGE_01_INERTIA",
+          "concept_id": "newton_first_law_inertia",
+          "title": "The Frictionless Ice Puck Paradox",
+          "difficulty": "Intermediate",
+          "prompt": "A hockey puck is gliding across a completely frictionless ice rink at a constant velocity of 12 m/s. A student asserts: 'There must be a continuous forward force of 12 N pushing the puck to sustain its 12 m/s speed.' Explain why this reasoning is correct or flawed, and identify the net force acting on the puck.",
+          "ground_truth_concept": "Net force is 0 N because constant velocity requires zero net force under Newton's 1st law.",
+          "solution_redactions": ["0 N", "zero force", "no force", "zero newtons", "0 newtons", "inertia keeps it moving"],
+          "transfer_question": "A space probe drifts through deep space far from any celestial body at 5,000 m/s with all thrusters off. Does it slow down, speed up, or maintain speed? Explain the net force."
+        },
+        {
+          "id": "CHALLENGE_02_FREEFALL",
+          "concept_id": "gravitational_acceleration_freefall",
+          "title": "Bowling Ball vs Wooden Ball in Vacuum",
+          "difficulty": "Intermediate",
+          "prompt": "A 10 kg bowling ball and a 1 kg wooden sphere are dropped simultaneously from a height of 20 meters inside a vacuum chamber. Which object reaches the floor first, and why? Explain using Newton's Second Law and gravitational force.",
+          "ground_truth_concept": "Both reach the floor at the exact same instant because acceleration a = F/m = (mg)/m = g, making acceleration independent of mass.",
+          "solution_redactions": ["same time", "both hit together", "identical acceleration", "a = g", "9.8 m/s^2", "mass cancels"],
+          "transfer_question": "On the Moon (no atmosphere), an astronaut drops a 2 kg rock and a 0.05 kg feather from 2 meters. Which strikes the lunar soil first and why?"
+        },
+        {
+          "id": "CHALLENGE_03_PEAK_ACCEL",
+          "concept_id": "acceleration_concept",
+          "title": "Instantaneous Acceleration at the Peak",
+          "difficulty": "Advanced",
+          "prompt": "A tennis ball is thrown vertically upwards into the air. At the highest point of its flight, its instantaneous velocity is 0 m/s. What is the acceleration of the ball at this exact instant? Justify your answer using forces.",
+          "ground_truth_concept": "Acceleration is 9.8 m/s^2 downwards because gravity is the only force acting on the ball.",
+          "solution_redactions": ["9.8 m/s^2", "9.8 downwards", "-9.8", "-g", "downward acceleration of g", "gravity"],
+          "transfer_question": "A pendulum swings to its highest turning point where it momentarily comes to rest before swinging back. Is its acceleration at this turning point zero or non-zero? Explain why."
+        }
+      ]
+    },
+    {
+      "id": "cs_algorithms",
+      "name": "Algorithms & Recursion (Computer Science)",
+      "domain": "Computer Science",
+      "description": "Recursive call stacks, base case termination, divide & conquer, and time complexity bounds.",
+      "concepts": [
+        {
+          "id": "recursion_call_stack",
+          "name": "Recursive Call Stack & Memory Frames",
+          "prerequisites": ["function_execution_model"],
+          "definition": "Each recursive invocation allocates a new stack frame containing local variables and return address. When a base case returns, execution unwinds through parent frames in LIFO order.",
+          "key_formulas": ["T(n) = a T(n/b) + f(n)", "\\text{Space} = O(\\text{depth})"]
+        },
+        {
+          "id": "base_case_termination",
+          "name": "Base Case Guard & Unwinding",
+          "prerequisites": ["recursion_call_stack"],
+          "definition": "A base case halts further recursive branching and initiates stack unwinding. Returning in a base case only returns to the immediate caller frame, not the root.",
+          "key_formulas": ["\\text{if } n \\le 1 \\text{ return 1}"]
+        }
+      ],
+      "misconception_library": [
+        {
+          "id": "CS_MISC_01",
+          "concept_id": "recursion_call_stack",
+          "name": "Base Case Return Exits Entire Program",
+          "category": "wrong_rule_definition",
+          "description": "Believing that returning a value from a recursive base case immediately exits the entire algorithm without executing remaining statements in parent frames.",
+          "counter_example": "A Russian nesting doll: opening the smallest inner doll doesn't destroy all outer dolls; you must close each outer doll one by one on the way back out!",
+          "scaffold_hints": [
+            "When function call f(1) returns, where does its returned value go?",
+            "Look at the call stack: f(3) called f(2), which called f(1). When f(1) finishes, which frame resumes execution?",
+            "Remember: return hands the value back to the caller frame on top of the call stack."
+          ]
+        }
+      ],
+      "diagnostic_challenges": [
+        {
+          "id": "CHALLENGE_CS_01_RECURSION",
+          "concept_id": "recursion_call_stack",
+          "title": "Recursive Stack Unwinding Mechanics",
+          "difficulty": "Intermediate",
+          "prompt": "Consider a recursive function `def sum_to_n(n): if n == 1: return 1; return n + sum_to_n(n-1)`. A candidate claims: 'When n==1 triggers return 1, the function terminates and immediately outputs 1 to the user.' Explain why this reasoning is incorrect and trace how stack unwinding computes the answer for n=3.",
+          "ground_truth_concept": "The base case returns 1 to the caller frame sum_to_n(2), which evaluates 2+1=3, which returns to sum_to_n(3), which evaluates 3+3=6.",
+          "solution_redactions": ["6", "output is 6", "returns 6", "3 + 2 + 1", "evaluates to 6"],
+          "transfer_question": "In a recursive tree traversal `def count_nodes(root): if not root: return 0; return 1 + count_nodes(root.left) + count_nodes(root.right)`, what happens when `root.left` reaches `None` and returns 0?"
+        }
+      ]
+    }
+  ]
+}

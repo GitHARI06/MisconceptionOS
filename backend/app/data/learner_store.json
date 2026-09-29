@@ -1,0 +1,1624 @@
+{
+  "test-session-1": {
+    "session_id": "test-session-1",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": null,
+    "current_phase": "GREETING",
+    "concept_states": {
+      "displacement_velocity": {
+        "concept_id": "displacement_velocity",
+        "concept_name": "Displacement & Velocity",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Acceleration & Velocity Change",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's First Law (Inertia)",
+        "mastery_prob": 0.05,
+        "total_attempts": 1,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [
+          "PHYS_MISC_01"
+        ],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's Second Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_third_law_action_reaction": {
+        "concept_id": "newton_third_law_action_reaction",
+        "concept_name": "Newton's Third Law (Action-Reaction)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall & Gravitational Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-28T23:07:12.533552",
+        "user": "There must be a continuous forward force of 12 N pushing the puck to keep it moving at 12 m/s.",
+        "tutor": "That's an intuitive way to think about it! But let's test that rule with a thought experiment: Consider Voyager spacecraft cruising at 38,000 mph through deep interstellar space with engines shutdown.. If an engine is needed to keep an object moving, why doesn't it grind to a halt in deep space?",
+        "tier": "COGNITIVE_CONFLICT",
+        "category": "wrong_rule_definition",
+        "evidence": "Student equates constant velocity with an ongoing net forward force (Aristotelian misconception), violating Newton's First Law (\\Sigma F = 0 for constant v).",
+        "confidence": 0.95,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "COGNITIVE_CONFLICT",
+    "stuckness_turn_count": 1,
+    "active_misconception_id": "PHYS_MISC_01",
+    "created_at": "2026-09-28T23:07:04.467783",
+    "updated_at": "2026-09-28T23:07:12.533531"
+  },
+  "open-learner-99": {
+    "session_id": "open-learner-99",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": null,
+    "current_phase": "GREETING",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.05,
+        "total_attempts": 1,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-28T23:29:52.722671",
+        "user": "Why does a bicycle stay upright when you are moving forward but falls over when you stop?",
+        "tutor": "No worries at all, that's exactly why we're exploring this! To start from what you know: in this scenario, what forces do you think are acting on the puck once it's already in motion?",
+        "tier": "DIAGNOSTIC_PROBE",
+        "category": "insufficient_evidence",
+        "evidence": "Student explicitly expressed uncertainty or provided minimal reasoning, indicating a lack of diagnostic signal rather than a persistent misconception.",
+        "confidence": 0.92,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "DIAGNOSTIC_PROBE",
+    "stuckness_turn_count": 1,
+    "active_misconception_id": null,
+    "created_at": "2026-09-28T23:29:44.675209",
+    "updated_at": "2026-09-28T23:29:52.722657"
+  },
+  "learner-9263": {
+    "session_id": "learner-9263",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": null,
+    "current_phase": "GREETING",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [],
+    "current_tier": "DIAGNOSTIC_PROBE",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-28T23:31:40.715024",
+    "updated_at": "2026-09-28T23:31:40.715035"
+  },
+  "learner-8936": {
+    "session_id": "learner-8936",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": null,
+    "current_phase": "GREETING",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-28T23:45:40.690538",
+        "user": "Why does inertia?",
+        "tutor": "Let's explore that reasoning together. If you look at the relationship between the quantities involved, what primary principle or law do you think governs this scenario?",
+        "tier": "DIAGNOSTIC_PROBE",
+        "category": "insufficient_evidence",
+        "evidence": "Freeform learner reasoning received; formulating Socratic framing question.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "DIAGNOSTIC_PROBE",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-28T23:45:32.644940",
+    "updated_at": "2026-09-28T23:45:40.690527"
+  },
+  "learner-1744": {
+    "session_id": "learner-1744",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": null,
+    "current_phase": "GREETING",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-28T23:47:59.615088",
+        "user": "What are the three laws of Newton?",
+        "tutor": "Let's explore that reasoning together. If you look at the relationship between the quantities involved, what primary principle or law do you think governs this scenario?",
+        "tier": "DIAGNOSTIC_PROBE",
+        "category": "insufficient_evidence",
+        "evidence": "Freeform learner reasoning received; formulating Socratic framing question.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "DIAGNOSTIC_PROBE",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-28T23:47:51.574666",
+    "updated_at": "2026-09-28T23:47:59.615056"
+  },
+  "user-turn-test": {
+    "session_id": "user-turn-test",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": null,
+    "current_phase": "GREETING",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-28T23:58:28.444748",
+        "user": "what are the three laws of Newton",
+        "tutor": "Newton's three laws are: 1. **Inertia** (an object stays at rest or moves with constant velocity unless a net force acts on it), 2. **\\(F = m \\cdot a\\)** (net force causes acceleration, not velocity), and 3. **Action-Reaction** (every force has an equal and opposite reaction on a different object). \n\nNow, to test this: If a spacecraft is cruising through deep space with all engines turned off, which law explains why it keeps gliding forward?",
+        "tier": "DIAGNOSTIC_PROBE",
+        "category": "insufficient_evidence",
+        "evidence": "Freeform learner reasoning received; formulating Socratic framing question.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "DIAGNOSTIC_PROBE",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-28T23:58:21.404573",
+    "updated_at": "2026-09-28T23:58:28.444733"
+  },
+  "learner-5075": {
+    "session_id": "learner-5075",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": null,
+    "current_phase": "GREETING",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-29T07:07:36.671222",
+        "user": "What are the three laws of Newton?",
+        "tutor": "Newton's three laws are: 1. **Inertia** (an object stays at rest or moves with constant velocity unless a net force acts on it), 2. **\\(F = m \\cdot a\\)** (net force causes acceleration, not velocity), and 3. **Action-Reaction** (every force has an equal and opposite reaction on a different object). \n\nNow, to test this: If a spacecraft is cruising through deep space with all engines turned off, which law explains why it keeps gliding forward?",
+        "tier": "DIAGNOSTIC_PROBE",
+        "category": "insufficient_evidence",
+        "evidence": "Freeform learner reasoning received; formulating Socratic framing question.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T07:08:36.851364",
+        "user": "Is it the first law?",
+        "tutor": "Great question! In physics, motion and forces are governed by fundamental conservation laws. To build from what you know: What force or relationship do you think is active in this scenario?",
+        "tier": "DIAGNOSTIC_PROBE",
+        "category": "insufficient_evidence",
+        "evidence": "Freeform learner reasoning received; formulating Socratic framing question.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "DIAGNOSTIC_PROBE",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-29T07:05:51.973289",
+    "updated_at": "2026-09-29T07:08:36.851355"
+  },
+  "multi-turn-test-101": {
+    "session_id": "multi-turn-test-101",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": null,
+    "current_phase": "GREETING",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-29T07:12:21.135520",
+        "user": "what are the three laws of newton",
+        "tutor": "Newton's three laws are: 1. **Inertia** (an object stays at rest or moves with constant velocity unless a net force acts on it), 2. **\\(F = m \\cdot a\\)** (net force causes acceleration, not velocity), and 3. **Action-Reaction** (every force has an equal and opposite reaction on a different object). \n\nNow, to test this: If a spacecraft is cruising through deep space with all engines turned off, which law explains why it keeps gliding forward?",
+        "tier": "DIAGNOSTIC_PROBE",
+        "category": "insufficient_evidence",
+        "evidence": "Freeform learner reasoning received; formulating Socratic framing question.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T07:12:40.280732",
+        "user": "is it the first law?",
+        "tutor": "Great question! In physics, motion and forces are governed by fundamental conservation laws. To build from what you know: What force or relationship do you think is active in this scenario?",
+        "tier": "DIAGNOSTIC_PROBE",
+        "category": "insufficient_evidence",
+        "evidence": "Freeform learner reasoning received; formulating Socratic framing question.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "DIAGNOSTIC_PROBE",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-29T07:12:14.070202",
+    "updated_at": "2026-09-29T07:12:40.280723"
+  },
+  "dialogue-verify-999": {
+    "session_id": "dialogue-verify-999",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": null,
+    "current_phase": "GREETING",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.5,
+        "total_attempts": 1,
+        "correct_reasonings": 1,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-29T07:13:50.321205",
+        "user": "what are the three laws of newton",
+        "tutor": "Newton's three laws are: 1. **Inertia** (an object stays at rest or moves with constant velocity unless a net force acts on it), 2. **\\(F = m \\cdot a\\)** (net force causes acceleration, not velocity), and 3. **Action-Reaction** (every force has an equal and opposite reaction on a different object). \n\nNow, to test this in action: If a spacecraft is cruising through deep space with all engines turned off, which law explains why it keeps gliding forward?",
+        "tier": "DIAGNOSTIC_PROBE",
+        "category": "insufficient_evidence",
+        "evidence": "Student requested foundational explanation of Newton's 3 Laws.",
+        "confidence": 0.9,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T07:14:10.288740",
+        "user": "is it the first law?",
+        "tutor": "Spot on! That's exactly right\u2014Newton's First Law (Inertia) states that an object in motion will continue with constant velocity unless acted on by a net external force. In the vacuum of deep space, zero force is needed to keep coasting! \n\nNow, to take it one step further: If the spacecraft wants to turn 90 degrees or slow down, what must be applied according to the Second Law?",
+        "tier": "TRANSFER_VERIFICATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student correctly applied Newton's First Law (Inertia) to explain constant velocity with zero net force in deep space.",
+        "confidence": 0.96,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "TRANSFER_VERIFICATION",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-29T07:13:36.172436",
+    "updated_at": "2026-09-29T07:14:10.288730"
+  },
+  "learner-8654": {
+    "session_id": "learner-8654",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": null,
+    "current_phase": "GREETING",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.5,
+        "total_attempts": 1,
+        "correct_reasonings": 1,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-29T07:15:47.312674",
+        "user": "What are the three laws of Newton?",
+        "tutor": "Newton's three laws are: 1. **Inertia** (an object stays at rest or moves with constant velocity unless a net force acts on it), 2. **\\(F = m \\cdot a\\)** (net force causes acceleration, not velocity), and 3. **Action-Reaction** (every force has an equal and opposite reaction on a different object). \n\nNow, to test this in action: If a spacecraft is cruising through deep space with all engines turned off, which law explains why it keeps gliding forward?",
+        "tier": "DIAGNOSTIC_PROBE",
+        "category": "insufficient_evidence",
+        "evidence": "Student requested foundational explanation of Newton's 3 Laws.",
+        "confidence": 0.9,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T07:16:41.762089",
+        "user": "is it the first one?",
+        "tutor": "Spot on! That's exactly right\u2014Newton's First Law (Inertia) states that an object in motion will continue with constant velocity unless acted on by a net external force. In the vacuum of deep space, zero force is needed to keep coasting! \n\nNow, to take it one step further: If the spacecraft wants to turn 90 degrees or slow down, what must be applied according to the Second Law?",
+        "tier": "TRANSFER_VERIFICATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student correctly applied Newton's First Law (Inertia) to explain constant velocity with zero net force in deep space.",
+        "confidence": 0.96,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T07:17:44.928997",
+        "user": "I'm sorry, I don't know the answer to this.",
+        "tutor": "Great observation! Let's connect that directly to the governing physical principles. How does this relate to whether the object's speed or direction is actively changing?",
+        "tier": "DIAGNOSTIC_PROBE",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "DIAGNOSTIC_PROBE",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-29T07:15:33.190566",
+    "updated_at": "2026-09-29T07:17:44.928987"
+  },
+  "dialogue-turn3-verify": {
+    "session_id": "dialogue-turn3-verify",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": null,
+    "current_phase": "GREETING",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.5,
+        "total_attempts": 1,
+        "correct_reasonings": 1,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-29T07:21:07.281888",
+        "user": "what are the three laws of newton",
+        "tutor": "Newton's three laws are: 1. **Inertia** (an object stays at rest or moves with constant velocity unless a net force acts on it), 2. **\\(F = m \\cdot a\\)** (net force causes acceleration, not velocity), and 3. **Action-Reaction** (every force has an equal and opposite reaction on a different object). \n\nNow, to test this in action: If a spacecraft is cruising through deep space with all engines turned off, which law explains why it keeps gliding forward?",
+        "tier": "DIAGNOSTIC_PROBE",
+        "category": "insufficient_evidence",
+        "evidence": "Student requested foundational explanation of Newton's 3 Laws.",
+        "confidence": 0.9,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T07:21:26.406331",
+        "user": "is it the first one?",
+        "tutor": "Spot on! That's exactly right\u2014Newton's First Law (Inertia) states that an object in motion will continue with constant velocity unless acted on by a net external force. In the vacuum of deep space, zero force is needed to keep coasting! \n\nNow, to take it one step further: If the spacecraft wants to turn 90 degrees or slow down, what must be applied according to the Second Law?",
+        "tier": "TRANSFER_VERIFICATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student correctly applied Newton's First Law (Inertia) to explain constant velocity with zero net force in deep space.",
+        "confidence": 0.96,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T07:21:45.541638",
+        "user": "I'm sorry, I don't know the answer to this.",
+        "tutor": "Great observation! Let's connect that directly to the governing physical principles. How does this relate to whether the object's speed or direction is actively changing?",
+        "tier": "DIAGNOSTIC_PROBE",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "DIAGNOSTIC_PROBE",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-29T07:20:53.154106",
+    "updated_at": "2026-09-29T07:21:45.541630"
+  },
+  "dialogue-turn3-fresh": {
+    "session_id": "dialogue-turn3-fresh",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": null,
+    "current_phase": "GREETING",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.5,
+        "total_attempts": 1,
+        "correct_reasonings": 1,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-29T07:23:19.209495",
+        "user": "what are the three laws of newton",
+        "tutor": "Newton's three laws are: 1. **Inertia** (an object stays at rest or moves with constant velocity unless a net force acts on it), 2. **\\(F = m \\cdot a\\)** (net force causes acceleration, not velocity), and 3. **Action-Reaction** (every force has an equal and opposite reaction on a different object). \n\nNow, to test this in action: If a spacecraft is cruising through deep space with all engines turned off, which law explains why it keeps gliding forward?",
+        "tier": "DIAGNOSTIC_PROBE",
+        "category": "insufficient_evidence",
+        "evidence": "Student requested foundational explanation of Newton's 3 Laws.",
+        "confidence": 0.9,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T07:23:39.378197",
+        "user": "is it the first one?",
+        "tutor": "Spot on! That's exactly right\u2014Newton's First Law (Inertia) states that an object in motion will continue with constant velocity unless acted on by a net external force. In the vacuum of deep space, zero force is needed to keep coasting! \n\nNow, to take it one step further: If the spacecraft wants to turn 90 degrees or slow down, what must be applied according to the Second Law?",
+        "tier": "TRANSFER_VERIFICATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student correctly applied Newton's First Law (Inertia) to explain constant velocity with zero net force in deep space.",
+        "confidence": 0.96,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T07:23:58.488951",
+        "user": "I'm sorry, I don't know the answer to this.",
+        "tutor": "No worries at all, that's completely okay! Let's break it down together: In Newton's Second Law (\\(F = m \\cdot a\\)), **acceleration** means any change in speed or direction. To change the spacecraft's direction or slow it down, what must the rocket engines exert\u2014a **net force**, or zero force?",
+        "tier": "DIAGNOSTIC_PROBE",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "DIAGNOSTIC_PROBE",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-29T07:23:05.108186",
+    "updated_at": "2026-09-29T07:23:58.488943"
+  },
+  "classroom-flow-full-test": {
+    "session_id": "classroom-flow-full-test",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": null,
+    "current_phase": "GREETING",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [],
+    "current_tier": "DIAGNOSTIC_PROBE",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-29T07:35:22.066548",
+    "updated_at": "2026-09-29T07:35:22.066555"
+  },
+  "run-check-2026": {
+    "session_id": "run-check-2026",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": "Thermodynamics",
+    "current_phase": "SOCRATIC_CHALLENGE",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-29T07:56:56.054723",
+        "user": "let's learn thermodynamics",
+        "tutor": "Thermodynamics is the branch of physics that studies heat, work, temperature, and energy transformations. It is governed by foundational laws: the First Law (Conservation of Energy) and the Second Law (heat naturally flows from hotter to colder bodies, and entropy always increases). \n\nDo you have any doubts or questions on this, or are you ready to test your understanding with a challenge?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T07:57:26.318155",
+        "user": "I have no doubts",
+        "tutor": "Awesome, let's put your thinking to the test! Imagine a hot cup of coffee left on a table in a room at 20\u00b0C. Can thermal energy from the room spontaneously flow back into the coffee to make it boil again without an external energy source? Explain your reasoning using thermodynamics.",
+        "tier": "DIAGNOSTIC_PROBE",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T07:57:45.565445",
+        "user": "what is entropy?",
+        "tutor": "Entropy is a measure of the disorder or randomness in a physical system. According to the Second Law of Thermodynamics, in any spontaneous process, the total entropy of the universe always increases, meaning heat naturally disperses and cannot spontaneously concentrate without external work. \n\nDid that make sense and did you understand, or would you like another example?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T07:58:04.696111",
+        "user": "yes, I understood",
+        "tutor": "Awesome, let's put your thinking to the test! Imagine a hot cup of coffee left on a table in a room at 20\u00b0C. Can thermal energy from the room spontaneously flow back into the coffee to make it boil again without an external energy source? Explain your reasoning using thermodynamics.",
+        "tier": "DIAGNOSTIC_PROBE",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "DIAGNOSTIC_PROBE",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-29T07:56:41.936480",
+    "updated_at": "2026-09-29T07:58:04.696100"
+  },
+  "physics-wide-check": {
+    "session_id": "physics-wide-check",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": "Optics",
+    "current_phase": "TOPIC_TEACHING",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-29T08:01:38.346981",
+        "user": "I want to learn optics",
+        "tutor": "Optics studies light and how it travels, reflects, refracts, and forms images. We will use ray models and wave ideas to explain mirrors, lenses, color, and the bending of light between materials. \n\nDo you have any doubts or questions on this, or are you ready to test your understanding?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "CONCEPTUAL_EXPLANATION",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-29T08:01:24.216315",
+    "updated_at": "2026-09-29T08:01:38.346961"
+  },
+  "learner-4508": {
+    "session_id": "learner-4508",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": "Thermodynamics",
+    "current_phase": "RESOLVING_DOUBT",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-29T08:06:23.648760",
+        "user": "Can you explain me about thermodynamics?",
+        "tutor": "Thermodynamics is the branch of physics that studies heat, work, temperature, and energy transformations. It is governed by foundational laws: the First Law (Conservation of Energy) and the Second Law (heat naturally flows from hotter to colder bodies, and entropy always increases). \n\nDo you have any doubts or questions on this, or are you ready to test your understanding with a challenge?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T08:07:15.198279",
+        "user": "Can you explain the first law on what conservation of energy?",
+        "tutor": "That's a great question! When analyzing this concept, remember that the underlying mechanism depends on how energy and forces interact in the system. \n\nDid that make sense and did you understand, or would you like another example?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T08:07:58.562911",
+        "user": "Can you give me another example?",
+        "tutor": "That's a great question! When analyzing this concept, remember that the underlying mechanism depends on how energy and forces interact in the system. \n\nDid that make sense and did you understand, or would you like another example?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "CONCEPTUAL_EXPLANATION",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-29T08:06:09.555489",
+    "updated_at": "2026-09-29T08:07:58.562901"
+  },
+  "repeat-check-physics": {
+    "session_id": "repeat-check-physics",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": "Thermodynamics",
+    "current_phase": "RESOLVING_DOUBT",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-29T08:12:52.718113",
+        "user": "whats thermodynamics",
+        "tutor": "Thermodynamics is the branch of physics that studies heat, work, temperature, and energy transformations. It is governed by foundational laws: the First Law (Conservation of Energy) and the Second Law (heat naturally flows from hotter to colder bodies, and entropy always increases). \n\nDo you have any doubts or questions on this, or are you ready to test your understanding with a challenge?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T08:13:05.702430",
+        "user": "what is the law of conservation of energy?",
+        "tutor": "The law of conservation of energy says that energy cannot be created or destroyed; it can only be transferred or transformed. For example, a battery changes chemical energy into electrical energy, which can become light, heat, or motion. Did that make sense, or would you like another example?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T08:13:17.802866",
+        "user": "can you give me another example?",
+        "tutor": "Here is another example: when a roller coaster descends, gravitational potential energy decreases while kinetic energy increases. Ignoring friction, the total energy stays constant\u2014the energy changes form rather than disappearing. Can you identify where the energy goes when the coaster climbs the next hill?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "CONCEPTUAL_EXPLANATION",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-29T08:12:45.656444",
+    "updated_at": "2026-09-29T08:13:17.802858"
+  },
+  "learner-6038": {
+    "session_id": "learner-6038",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": "Dynamics",
+    "current_phase": "RESOLVING_DOUBT",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-29T08:14:32.789187",
+        "user": "Can you explain me about Dromodynamics?",
+        "tutor": "Dynamics studies how forces change an object's motion. Newton's laws connect force, mass, and acceleration: the net force determines acceleration, while balanced forces produce no acceleration. \n\nDo you have any doubts or questions on this, or are you ready to test your understanding?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T08:15:34.485671",
+        "user": "Point is a net force.",
+        "tutor": "For Dynamics, the key is to identify the physical quantities involved, the system boundary, and the law that relates them. \n\nDid that make sense and did you understand, or would you like another example?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T08:16:03.964002",
+        "user": "No, that didn't make sense.",
+        "tutor": "For Dynamics, the key is to identify the physical quantities involved, the system boundary, and the law that relates them. \n\nDid that make sense and did you understand, or would you like another example?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T08:16:33.058081",
+        "user": "Can you give me another example?",
+        "tutor": "Here is a concrete example of Dynamics: imagine a familiar system changing from one state to another. Track the quantities entering and leaving the system, then ask which physical law explains that change. What part of this example would you like to unpack?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T08:17:12.339452",
+        "user": "So which physical law explains that change exactly?",
+        "tutor": "For Dynamics, the key is to identify the physical quantities involved, the system boundary, and the law that relates them. \n\nDid that make sense and did you understand, or would you like another example?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "CONCEPTUAL_EXPLANATION",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-29T08:14:25.729538",
+    "updated_at": "2026-09-29T08:17:12.339441"
+  },
+  "dynamic-check-physics": {
+    "session_id": "dynamic-check-physics",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": "Dynamics",
+    "current_phase": "RESOLVING_DOUBT",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-29T08:20:05.589497",
+        "user": "I want to learn dynamics",
+        "tutor": "Dynamics studies how forces change an object's motion. Newton's laws connect force, mass, and acceleration: the net force determines acceleration, while balanced forces produce no acceleration. \n\nDo you have any doubts or questions on this, or are you ready to test your understanding?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T08:20:25.828295",
+        "user": "So which physical law explains that change exactly?",
+        "tutor": "For Dynamics, the key is to identify the physical quantities involved, the system boundary, and the law that relates them. \n\nDid that make sense and did you understand, or would you like another example?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T08:22:09.910315",
+        "user": "So which physical law explains that change exactly?",
+        "tutor": "The physical law that explains how forces change an object's motion is Newton's Second Law of Motion, also known as the Law of Acceleration. This law states that the acceleration of an object is directly proportional to the net force acting upon it, and inversely proportional to its mass.\n\nDid that make sense and did you understand, or would you like another example?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "CONCEPTUAL_EXPLANATION",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-29T08:19:51.420445",
+    "updated_at": "2026-09-29T08:22:09.910306"
+  },
+  "law-fallback-check": {
+    "session_id": "law-fallback-check",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": "",
+    "current_phase": "GREETING",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-29T08:21:33.490928",
+        "user": "So which physical law explains that change exactly?",
+        "tutor": "Good morning, welcome to learning. What shall we learn today?",
+        "tier": "DIAGNOSTIC_PROBE",
+        "category": "insufficient_evidence",
+        "evidence": "Student provided conversational reasoning.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "DIAGNOSTIC_PROBE",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-29T08:21:26.401662",
+    "updated_at": "2026-09-29T08:21:33.490913"
+  },
+  "adaptive-physics-check": {
+    "session_id": "adaptive-physics-check",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": "Photoelectric Effect",
+    "current_phase": "TOPIC_TEACHING",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-29T08:25:09.818975",
+        "user": "What is the photoelectric effect?",
+        "tutor": "The photoelectric effect! Let's dive into it.\n\nThe photoelectric effect is a phenomenon where light hitting a metal surface can cause electrons to be emitted from the surface. It's a fundamental concept in physics that has been extensively studied and experimentally confirmed.\n\nHere's an intuitive example: Imagine you're at a concert, and the stage lights are shining directly onto you. If the lights are bright enough, you might feel a slight tingling sensation on your skin, even if you're not directly in the light beam. This is similar to what happens in the photoelectric effect, where the light energy excites the electrons in the metal surface, causing them to be emitted.\n\nNow, let's talk about the governing principles. The photoelectric effect is governed by the concept of wave-particle duality, which states that light can behave as both a wave and a particle. In the context of the photoelectric effect, light is behaving as a particle, called a photon, which has both energy and momentum.\n\nThe energy of the photon is related to its frequency, not its intensity. This means that even if the light is very intense, if it's not shining at the right frequency, it won't cause electrons to be emitted. The frequency of the light determines the maximum energy of the emitted electrons, and this is known as the work function of the metal.\n\nNow, I'd love to hear from you: What do you think is the key factor that determines whether light will cause electrons to be emitted from a metal surface?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "wrong_rule_definition",
+        "evidence": "The student is asking about the photoelectric effect, but their question lacks context and does not demonstrate an understanding of the concept. They are likely confusing it with another concept, such as Newton's laws of motion.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "CONCEPTUAL_EXPLANATION",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-29T08:24:58.098746",
+    "updated_at": "2026-09-29T08:25:09.818963"
+  },
+  "learner-7210": {
+    "session_id": "learner-7210",
+    "learner_name": "Student",
+    "unit_id": "physics_mechanics",
+    "current_topic": "Thermodynamics",
+    "current_phase": "SOCRATIC_SCAFFOLDING",
+    "concept_states": {
+      "newton_first_law_inertia": {
+        "concept_id": "newton_first_law_inertia",
+        "concept_name": "Newton's 1st Law (Inertia)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "gravitational_acceleration_freefall": {
+        "concept_id": "gravitational_acceleration_freefall",
+        "concept_name": "Freefall in Vacuum",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "acceleration_concept": {
+        "concept_id": "acceleration_concept",
+        "concept_name": "Instantaneous Acceleration",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      },
+      "newton_second_law_force_accel": {
+        "concept_id": "newton_second_law_force_accel",
+        "concept_name": "Newton's 2nd Law (F = ma)",
+        "mastery_prob": 0.15,
+        "total_attempts": 0,
+        "correct_reasonings": 0,
+        "misconceptions_logged": [],
+        "recovery_verified": false
+      }
+    },
+    "conversation_history": [
+      {
+        "timestamp": "2026-09-29T08:26:19.589894",
+        "user": "Can you explain to me about thermodynamics?",
+        "tutor": "Thermodynamics! I'm excited to dive into this fascinating topic with you.\n\nSo, you want to know about thermodynamics? Well, let's start with a simple question: What do you think thermodynamics is all about?\n\nIs it about heat, temperature, or energy? Or is it something more abstract?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "wrong_rule_definition",
+        "evidence": "The student is asking about thermodynamics without providing any context or prior knowledge, indicating a lack of understanding of the concept's definition.",
+        "confidence": 0.85,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T08:27:00.143535",
+        "user": "It's about energy, right?",
+        "tutor": "You're right that thermodynamics is about energy! Thermodynamics is the study of the relationships between heat, work, and energy. It's a branch of physics that deals with the ways in which energy is transferred and transformed between different forms, such as kinetic energy, potential energy, and thermal energy.\n\nIn essence, thermodynamics is concerned with the efficiency of energy conversion and the direction of spontaneous processes, like heat transfer or chemical reactions. It's a fundamental aspect of understanding how energy is used and conserved in various natural and technological systems.\n\nDid that make sense / did you understand, or would you like another example?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "insufficient_evidence",
+        "evidence": "The student's response indicates a lack of understanding of the scope of thermodynamics, which encompasses not only energy but also heat, temperature, and other related concepts.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T08:28:19.082617",
+        "user": "Can you explain to me with an example?",
+        "tutor": "You want to know about thermodynamics with an example? Let's consider a simple scenario: imagine you're driving a car on a hot summer day. As you accelerate, the engine produces more power, which is converted into kinetic energy, propelling the car forward. Now, think about what happens to the energy inside the engine. Does it just disappear?\n\nIn thermodynamics, we study how energy is transferred and transformed between different forms. In this case, the energy produced by the engine is converted into kinetic energy of the car, but some of it is also lost as heat to the surroundings. This heat is transferred to the air, the road, and even the car's interior. So, the energy doesn't just disappear; it's transformed into different forms, like heat and kinetic energy.\n\nDid that make sense / did you understand, or would you like another example?",
+        "tier": "CONCEPTUAL_EXPLANATION",
+        "category": "insufficient_evidence",
+        "evidence": "The student is seeking clarification on the explanation provided by the tutor, indicating a need for further elaboration or example to solidify their understanding of thermodynamics.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T08:29:36.504565",
+        "user": "Thank you, I understood about thermodynamics.",
+        "tutor": "Now that you've got a grasp on thermodynamics, let's put it to the test with a thought-provoking scenario challenge. Imagine you're on a hot summer day, and you're planning a road trip to the beach. As you're driving, you notice that your car's air conditioner is working overtime to keep the interior cool. You wonder, what's happening to the energy inside the car's engine when it's producing all that cooling power?\n\nCan you think of a way to harness the energy from the air conditioner to power your phone or laptop during the trip? Or, on the other hand, can you think of a way to use the energy from your phone or laptop to cool down the car's interior? Take a moment to think about the thermodynamic principles at play here.",
+        "tier": "DIAGNOSTIC_PROBE",
+        "category": "insufficient_evidence",
+        "evidence": "The student's response indicates a lack of depth in their understanding of thermodynamics, as they only acknowledge comprehension without providing further insight or demonstrating a clear grasp of the concept.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      },
+      {
+        "timestamp": "2026-09-29T08:30:44.345994",
+        "user": "I'm sorry but the wisdom sounds too complex for me to understand.",
+        "tutor": "I can see that you're feeling a bit overwhelmed by the concept of thermodynamics. No worries at all! Let's break it down into a simple clue. Thermodynamics is essentially about the flow of energy. Think of it like water flowing through a hose. The water (energy) starts at one end (like the engine in the car) and flows to the other end (like the air conditioner cooling the car's interior).\n\nCan you imagine the water flowing through the hose, and how it changes direction or speed as it goes? That's kind of like what's happening with energy in thermodynamics. The energy is being transferred and transformed from one form to another, like from kinetic energy (the car's motion) to thermal energy (the heat). Does that make sense?",
+        "tier": "SCAFFOLDED_HINT",
+        "category": "insufficient_evidence",
+        "evidence": "The student is not providing a clear answer to the tutor's previous question, indicating a lack of understanding of the thermodynamic concepts discussed.",
+        "confidence": 0.8,
+        "is_lucky_guess": false
+      }
+    ],
+    "current_tier": "SCAFFOLDED_HINT",
+    "stuckness_turn_count": 0,
+    "active_misconception_id": null,
+    "created_at": "2026-09-29T08:26:11.793694",
+    "updated_at": "2026-09-29T08:30:44.345986"
+  }
+}
