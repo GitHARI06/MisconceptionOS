@@ -7,62 +7,103 @@ from .rag_engine import knowledge_engine
 logger = logging.getLogger("misconception_os.policy")
 
 class SocraticPolicyEngine:
-    @staticmethod
-    def concept_id_for_topic(topic: Optional[str]) -> Optional[str]:
+    # These aliases provide stable concept buckets while still allowing the
+    # teacher to respond naturally to the learner's exact wording.
+    TOPIC_ALIASES = (
+        # Thermodynamics and thermal physics
+        ("first law of thermodynamics", "Thermodynamics"),
+        ("second law of thermodynamics", "Thermodynamics"),
+        ("third law of thermodynamics", "Thermodynamics"),
+        ("zeroth law of thermodynamics", "Thermodynamics"),
+        ("heat engine", "Thermodynamics"),
+        ("heat transfer", "Thermodynamics"),
+        ("thermodynamic", "Thermodynamics"),
+        ("thermochemistry", "Thermodynamics"),
+        ("calorimetry", "Thermodynamics"),
+        ("entropy", "Thermodynamics"),
+        ("enthalpy", "Thermodynamics"),
+        ("ideal gas", "Thermodynamics"),
+        ("gas law", "Thermodynamics"),
+        ("thermal", "Thermodynamics"),
+        ("heat", "Thermodynamics"),
+        ("temperature", "Thermodynamics"),
+        ("simple harmonic", "Simple Harmonic Motion"),
+        ("electromagnetic", "Electromagnetism"),
+        ("quantum mechanics", "Quantum Physics"),
+        ("relativistic mechanics", "Relativity"),
+        ("statistical mechanics", "Thermodynamics"),
+        # Mechanics and motion
+        ("projectile", "Kinematics"),
+        ("relative motion", "Kinematics"),
+        ("displacement", "Kinematics"),
+        ("velocity", "Kinematics"),
+        ("acceleration", "Kinematics"),
+        ("friction", "Newtonian Mechanics"),
+        ("inertia", "Newtonian Mechanics"),
+        ("gravitation", "Gravity and Free Fall"),
+        ("newton", "Newtonian Mechanics"),
+        ("mechanics", "Newtonian Mechanics"),
+        ("kinematic", "Kinematics"),
+        ("motion", "Motion"),
+        ("dynamic", "Dynamics"),
+        ("force", "Forces and Newton's Laws"),
+        ("energy", "Energy and Work"),
+        ("work", "Work and Energy"),
+        ("momentum", "Momentum and Collisions"),
+        ("impulse", "Impulse and Momentum"),
+        ("circular", "Circular Motion"),
+        ("rotation", "Rotational Motion"),
+        ("torque", "Torque and Angular Momentum"),
+        ("gravity", "Gravity and Free Fall"),
+        ("freefall", "Gravity and Free Fall"),
+        ("fluid", "Fluid Mechanics"),
+        ("pressure", "Pressure and Fluids"),
+        ("oscillation", "Oscillations"),
+        ("wave", "Waves"),
+        ("sound", "Sound Waves"),
+        ("optics", "Optics"),
+        ("light", "Light and Optics"),
+        ("reflection", "Reflection of Light"),
+        ("refraction", "Refraction of Light"),
+        ("electric field", "Electric Fields"),
+        ("electricity", "Electricity"),
+        ("voltage", "Electric Potential and Voltage"),
+        ("circuit", "Electric Circuits"),
+        ("current", "Electric Current"),
+        ("magnetism", "Magnetism"),
+        ("magnetic", "Magnetic Fields"),
+        ("semiconductor", "Semiconductors"),
+        ("relativity", "Relativity"),
+        ("quantum", "Quantum Physics"),
+        ("atomic", "Atomic Physics"),
+        ("nuclear", "Nuclear Physics"),
+        ("particle", "Particle Physics"),
+        ("astro", "Astrophysics"),
+        ("space", "Astrophysics"),
+    )
+
+    @classmethod
+    def canonical_topic(cls, topic: Optional[str]) -> Optional[str]:
         if not topic:
             return None
-        concept_id = re.sub(r"[^a-z0-9]+", "_", topic.lower()).strip("_")
+        normalized = topic.lower().strip()
+        for marker, label in cls.TOPIC_ALIASES:
+            if marker in normalized:
+                return label
+        return topic.strip().title()
+
+    @staticmethod
+    def concept_id_for_topic(topic: Optional[str]) -> Optional[str]:
+        canonical = SocraticPolicyEngine.canonical_topic(topic)
+        if not canonical:
+            return None
+        concept_id = re.sub(r"[^a-z0-9]+", "_", canonical.lower()).strip("_")
         return concept_id[:120] or None
 
     @staticmethod
     def _extract_topic(text_lower: str, current_topic: Optional[str] = None) -> Optional[str]:
         """Return a readable topic only when the learner actually supplied one."""
-        known_topics = [
-            ("thermodynamics", "Thermodynamics"),
-            ("newton", "Newtonian Mechanics"),
-            ("mechanics", "Newtonian Mechanics"),
-            ("kinematics", "Kinematics"),
-            ("motion", "Motion"),
-            ("dynamics", "Dynamics"),
-            ("force", "Forces and Newton's Laws"),
-            ("energy", "Energy and Work"),
-            ("work", "Work and Energy"),
-            ("momentum", "Momentum and Collisions"),
-            ("impulse", "Impulse and Momentum"),
-            ("circular", "Circular Motion"),
-            ("rotation", "Rotational Motion"),
-            ("torque", "Torque and Angular Momentum"),
-            ("gravity", "Gravity and Free Fall"),
-            ("freefall", "Gravity and Free Fall"),
-            ("fluid", "Fluid Mechanics"),
-            ("pressure", "Pressure and Fluids"),
-            ("oscillation", "Oscillations"),
-            ("simple harmonic", "Simple Harmonic Motion"),
-            ("wave", "Waves"),
-            ("sound", "Sound Waves"),
-            ("optics", "Optics"),
-            ("light", "Light and Optics"),
-            ("reflection", "Reflection of Light"),
-            ("refraction", "Refraction of Light"),
-            ("electricity", "Electricity"),
-            ("electric field", "Electric Fields"),
-            ("voltage", "Electric Potential and Voltage"),
-            ("circuit", "Electric Circuits"),
-            ("current", "Electric Current"),
-            ("magnetism", "Magnetism"),
-            ("magnetic", "Magnetic Fields"),
-            ("electromagnetism", "Electromagnetism"),
-            ("electromagnetic", "Electromagnetism"),
-            ("semiconductor", "Semiconductors"),
-            ("relativity", "Relativity"),
-            ("quantum", "Quantum Physics"),
-            ("atomic", "Atomic Physics"),
-            ("nuclear", "Nuclear Physics"),
-            ("particle", "Particle Physics"),
-            ("astro", "Astrophysics"),
-            ("space", "Astrophysics"),
-        ]
-        for marker, label in known_topics:
+        for marker, label in SocraticPolicyEngine.TOPIC_ALIASES:
             if marker in text_lower:
                 return label
 

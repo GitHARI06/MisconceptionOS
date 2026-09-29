@@ -55,8 +55,23 @@ async def transcribe_audio_base64(audio_base64: str) -> str:
         if model is None:
             return ""
             
-        segments, info = model.transcribe(temp_path, beam_size=1, language="en")
-        transcribed_text = " ".join([segment.text for segment in segments]).strip()
+        segments, info = model.transcribe(
+            temp_path,
+            beam_size=1,
+            language="en",
+            vad_filter=True,
+            vad_parameters={"min_silence_duration_ms": 350},
+        )
+        # Keep only speech-like Whisper segments. Browser echo cancellation
+        # and microphone noise suppression handle the input signal; this
+        # second gate prevents residual silence/noise from becoming a query.
+        clean_segments = []
+        for segment in segments:
+            no_speech_prob = getattr(segment, "no_speech_prob", 0.0) or 0.0
+            avg_logprob = getattr(segment, "avg_logprob", 0.0) or 0.0
+            if no_speech_prob < 0.65 and avg_logprob > -1.5 and segment.text.strip():
+                clean_segments.append(segment.text.strip())
+        transcribed_text = " ".join(clean_segments).strip()
         return transcribed_text
     except Exception as e:
         logger.error(f"Whisper transcription error: {e}")

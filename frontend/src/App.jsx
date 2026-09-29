@@ -5,16 +5,23 @@ import { WebGroundingViewer } from './components/WebGroundingViewer';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('voice'); // 'voice' | 'teacher' | 'grounding'
-  const [sessionId, setSessionId] = useState(() => 'learner-' + Math.floor(1000 + Math.random() * 9000));
+  const [sessionId] = useState(() => {
+    const storageKey = 'misconceptionos-learner-session';
+    const existingId = window.localStorage.getItem(storageKey);
+    if (existingId) return existingId;
+    const newId = `learner-${crypto.randomUUID()}`;
+    window.localStorage.setItem(storageKey, newId);
+    return newId;
+  });
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [history, setHistory] = useState([]);
+  const [conceptHistory, setConceptHistory] = useState({});
 
   const refreshHistory = async () => {
     try {
-      const response = await fetch(`/api/teacher/learner-state/${sessionId}`);
+      const response = await fetch(`/api/teacher/concept-conversations/${sessionId}`);
       if (!response.ok) return;
       const data = await response.json();
-      setHistory(data.conversation_history || []);
+      setConceptHistory(data.conversations || {});
     } catch (error) {
       console.warn('Unable to load conversation history:', error);
     }
@@ -82,13 +89,13 @@ export default function App() {
       {/* Session history drawer */}
       <aside
         aria-hidden={!historyOpen}
-        className={`fixed inset-y-0 left-0 z-40 w-80 max-w-[88vw] border-r border-slate-800 bg-[#080b14] shadow-2xl transition-transform duration-300 ease-out ${
+        className={`fixed top-16 bottom-0 left-0 z-40 w-80 max-w-[88vw] border-r border-slate-800 bg-[#080b14] shadow-2xl transition-transform duration-300 ease-out ${
           historyOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
           <div>
-            <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-cyan-400">Learning history</p>
+            <p className="text-sm font-semibold text-white">History</p>
             <p className="mt-1 text-sm text-slate-300">This session</p>
           </div>
           <button
@@ -101,19 +108,25 @@ export default function App() {
           </button>
         </div>
         <div className="h-[calc(100%-73px)] overflow-y-auto px-4 py-4">
-          {history.length === 0 ? (
+          {Object.keys(conceptHistory).length === 0 ? (
             <p className="rounded-lg border border-dashed border-slate-800 px-3 py-4 text-xs leading-5 text-slate-500">
-              Your questions and the tutor’s explanations will appear here.
+              Physics concepts you explore will appear here and remain available when you return.
             </p>
           ) : (
             <div className="space-y-3">
-              {history.map((turn, index) => (
-                <div key={`${turn.timestamp || 'turn'}-${index}`} className="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
-                  <p className="text-[10px] font-mono uppercase tracking-wide text-slate-500">Turn {index + 1}</p>
-                  <p className="mt-2 text-xs leading-5 text-cyan-200">{turn.user}</p>
-                  <p className="mt-2 line-clamp-4 text-xs leading-5 text-slate-400">{turn.tutor}</p>
-                </div>
-              ))}
+              {Object.entries(conceptHistory).map(([conceptId, turns]) => {
+                const latestTurn = turns[turns.length - 1];
+                const topic = latestTurn?.topic || conceptId.replaceAll('_', ' ');
+                return (
+                  <div key={conceptId} className="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+                    <p className="text-sm font-semibold capitalize text-cyan-200">{topic}</p>
+                    <p className="mt-1 text-[10px] font-mono uppercase tracking-wide text-slate-500">
+                      {turns.length} {turns.length === 1 ? 'conversation' : 'conversations'}
+                    </p>
+                    <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-400">{latestTurn?.user}</p>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

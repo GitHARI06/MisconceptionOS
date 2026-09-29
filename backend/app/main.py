@@ -81,7 +81,10 @@ async def process_student_turn(submission: StudentInput):
     user_text = submission.text or ""
     
     # 1. Voice STT if audio supplied
-    if submission.audio_base64:
+    # The browser sends a confidence-filtered transcript for normal turns
+    # and interruptions. Trusting that clean text avoids a second Whisper
+    # pass over the same audio; raw audio remains the fallback path.
+    if submission.audio_base64 and not user_text.strip():
         stt_text = await transcribe_audio_base64(submission.audio_base64)
         if stt_text:
             user_text = stt_text
@@ -118,7 +121,9 @@ async def process_student_turn(submission: StudentInput):
 
     # 4. Retrieve persistent profile & conversation history
     profile = learner_memory.get_or_create_profile(session_id, submission.unit_id)
-    requested_topic = SocraticPolicyEngine._extract_topic(user_text.lower(), profile.current_topic)
+    requested_topic = SocraticPolicyEngine.canonical_topic(
+        SocraticPolicyEngine._extract_topic(user_text.lower(), profile.current_topic)
+    )
     requested_concept_id = SocraticPolicyEngine.concept_id_for_topic(requested_topic)
     concept_history = []
     active_concept_id = requested_concept_id or profile.current_concept_id
@@ -127,12 +132,21 @@ async def process_student_turn(submission: StudentInput):
     context_history = concept_history or profile.conversation_history
 
     # 5. Multi-Turn Cognitive Diagnostic Engine
-    diagnostic = await DiagnosticEngine.diagnose_reasoning(
-        student_text=user_text,
-        challenge_id=submission.challenge_id,
-        unit_id=submission.unit_id,
-        conversation_history=context_history
+    topic_selection_turn = bool(requested_topic) and (
+        profile.current_phase == LessonPhase.GREETING
+        or any(marker in user_text.lower() for marker in ["let's learn", "lets learn", "teach me", "want to learn", "study "])
     )
+    if topic_selection_turn:
+        # Topic selection does not contain reasoning to diagnose. Avoid an
+        # unnecessary local-LLM round trip before the introduction response.
+        diagnostic = DiagnosticEngine._multi_turn_heuristic(user_text, context_history)
+    else:
+        diagnostic = await DiagnosticEngine.diagnose_reasoning(
+            student_text=user_text,
+            challenge_id=submission.challenge_id,
+            unit_id=submission.unit_id,
+            conversation_history=context_history
+        )
 
     # 6. Socratic Policy Arbiter: Compute Next Lesson Step
     directive = SocraticPolicyEngine.determine_next_step(
@@ -146,6 +160,7 @@ async def process_student_turn(submission: StudentInput):
 
     # Update profile phase & topic
     profile.current_phase = directive.lesson_phase
+    directive.topic = SocraticPolicyEngine.canonical_topic(directive.topic) or directive.topic
     profile.current_topic = directive.topic
     concept_id = SocraticPolicyEngine.concept_id_for_topic(directive.topic)
     profile.current_concept_id = concept_id

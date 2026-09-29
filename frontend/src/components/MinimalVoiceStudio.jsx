@@ -17,7 +17,84 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
   const audioChunksRef = useRef([]);
   const audioPlayerRef = useRef(new Audio());
   const recognitionRef = useRef(null);
+  const recognitionWantedRef = useRef(false);
+  const speakingRef = useRef(false);
+  const hasStartedRef = useRef(false);
+  const micStreamRef = useRef(null);
+  const audioContextRef = useRef(null);
+  const analyserRef = useRef(null);
+  const monitorFrameRef = useRef(null);
+  const speechDetectedRef = useRef(false);
+  const lastVoiceAtRef = useRef(0);
+  const speechArmedAtRef = useRef(0);
+  const interruptionHandlerRef = useRef(null);
+  const processingRef = useRef(false);
   const spokenTextRef = useRef('');
+
+  const stopRecognition = () => {
+    recognitionWantedRef.current = false;
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch (e) {}
+    }
+  };
+
+  const startRecognition = () => {
+    if (!recognitionRef.current || recognitionWantedRef.current) return;
+    recognitionWantedRef.current = true;
+    try { recognitionRef.current.start(); } catch (e) {}
+  };
+
+  const stopVoiceActivityMonitor = () => {
+    if (monitorFrameRef.current) cancelAnimationFrame(monitorFrameRef.current);
+    monitorFrameRef.current = null;
+    if (audioContextRef.current) audioContextRef.current.close().catch(() => {});
+    audioContextRef.current = null;
+    analyserRef.current = null;
+  };
+
+  const startVoiceActivityMonitor = async (stream, onSpeech = null) => {
+    stopVoiceActivityMonitor();
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    const audioContext = new AudioContextClass();
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 512;
+    analyser.smoothingTimeConstant = 0.2;
+    audioContext.createMediaStreamSource(stream).connect(analyser);
+    await audioContext.resume().catch(() => {});
+    audioContextRef.current = audioContext;
+    analyserRef.current = analyser;
+    speechDetectedRef.current = false;
+    lastVoiceAtRef.current = Date.now();
+    const samples = new Uint8Array(analyser.fftSize);
+
+    const monitor = () => {
+      if (!analyserRef.current) return;
+      analyser.getByteTimeDomainData(samples);
+      let sum = 0;
+      for (const sample of samples) {
+        const centered = (sample - 128) / 128;
+        sum += centered * centered;
+      }
+      const rms = Math.sqrt(sum / samples.length);
+      if (rms > 0.018) {
+        const firstVoiceFrame = !speechDetectedRef.current;
+        speechDetectedRef.current = true;
+        lastVoiceAtRef.current = Date.now();
+        if (firstVoiceFrame && onSpeech) onSpeech();
+      } else if (
+        speechDetectedRef.current &&
+        Date.now() - lastVoiceAtRef.current > 1100 &&
+        mediaRecorderRef.current?.state === 'recording'
+      ) {
+        // Natural pause detected: finish the turn without an orb click.
+        stopListening();
+        return;
+      }
+      monitorFrameRef.current = requestAnimationFrame(monitor);
+    };
+    monitorFrameRef.current = requestAnimationFrame(monitor);
+  };
 
   useEffect(() => {
     // Initial bootup greeting speech
@@ -36,12 +113,34 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
         let interimTranscript = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           if (event.results[i].isFinal) {
-            spokenTextRef.current += event.results[i][0].transcript + ' ';
+            const result = event.results[i][0];
+            const cleanText = result.transcript.trim();
+            const confidence = typeof result.confidence === 'number' ? result.confidence : 1;
+            if (speakingRef.current && hasStartedRef.current) {
+              // Barge-in only accepts confident, non-filler speech. Echo
+              // cancellation/noise suppression are applied to the mic stream.
+              const fillerOnly = /^(uh+|um+|hmm+|okay|ok|yes|no)[.!\s]*$/i.test(cleanText);
+              if (cleanText.length >= 3 && confidence >= 0.35 && !fillerOnly) {
+                interruptionHandlerRef.current?.(cleanText);
+              }
+            } else if (cleanText && confidence >= 0.35) {
+              spokenTextRef.current += cleanText + ' ';
+            }
           } else {
             interimTranscript += event.results[i][0].transcript;
           }
         }
-        setLiveTranscript(spokenTextRef.current + interimTranscript);
+        if (interimTranscript) {
+          setLiveTranscript(speakingRef.current ? `Interrupting: ${interimTranscript}` : spokenTextRef.current + interimTranscript);
+        } else if (!speakingRef.current) {
+          setLiveTranscript(spokenTextRef.current);
+        }
+      };
+
+      recognition.onend = () => {
+        if (recognitionWantedRef.current) {
+          window.setTimeout(() => startRecognition(), 80);
+        }
       };
 
       recognition.onerror = (e) => {
@@ -50,6 +149,8 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
 
       recognitionRef.current = recognition;
     }
+
+    return () => stopRecognition();
   }, []);
 
   const speakText = (text, b64Audio = null) => {
@@ -62,8 +163,22 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
       try {
         audioPlayerRef.current.pause();
         audioPlayerRef.current.src = `data:audio/mp3;base64,${b64Audio}`;
+        speakingRef.current = true;
+        speechArmedAtRef.current = Date.now() + 650;
         setOrbState('speaking');
-        audioPlayerRef.current.onended = () => setOrbState('idle');
+        if (hasStartedRef.current) {
+          startRecognition();
+          if (micStreamRef.current) {
+            startVoiceActivityMonitor(micStreamRef.current, () => {
+              if (speakingRef.current && Date.now() >= speechArmedAtRef.current) beginBargeIn();
+            });
+          }
+        }
+        audioPlayerRef.current.onended = () => {
+          speakingRef.current = false;
+          stopRecognition();
+          setOrbState('idle');
+        };
         audioPlayerRef.current.onerror = () => fallbackBrowserTTS(text);
         audioPlayerRef.current.play().catch(e => {
           console.warn("Autoplay block, fallback to Web Speech TTS:", e);
@@ -89,9 +204,29 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
-    utterance.onstart = () => setOrbState('speaking');
-    utterance.onend = () => setOrbState('idle');
-    utterance.onerror = () => setOrbState('idle');
+    utterance.onstart = () => {
+      speakingRef.current = true;
+      speechArmedAtRef.current = Date.now() + 650;
+      setOrbState('speaking');
+      if (hasStartedRef.current) {
+        startRecognition();
+        if (micStreamRef.current) {
+          startVoiceActivityMonitor(micStreamRef.current, () => {
+            if (speakingRef.current && Date.now() >= speechArmedAtRef.current) beginBargeIn();
+          });
+        }
+      }
+    };
+    utterance.onend = () => {
+      speakingRef.current = false;
+      stopRecognition();
+      setOrbState('idle');
+    };
+    utterance.onerror = () => {
+      speakingRef.current = false;
+      stopRecognition();
+      setOrbState('idle');
+    };
     window.speechSynthesis.speak(utterance);
   };
 
@@ -140,6 +275,7 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
     try {
       if (!hasStarted) {
         setHasStarted(true);
+        hasStartedRef.current = true;
       }
       if (window.speechSynthesis) window.speechSynthesis.cancel();
       audioPlayerRef.current.pause();
@@ -156,11 +292,16 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
       spokenTextRef.current = '';
       setLiveTranscript('');
 
-      if (recognitionRef.current) {
-        try { recognitionRef.current.start(); } catch (e) {}
-      }
-
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = micStreamRef.current || await navigator.mediaDevices.getUserMedia({
+        audio: {
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        }
+      });
+      micStreamRef.current = stream;
+      startRecognition();
       mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
       audioChunksRef.current = [];
 
@@ -171,6 +312,7 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
       };
 
       mediaRecorderRef.current.onstop = async () => {
+        stopVoiceActivityMonitor();
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         const reader = new FileReader();
         reader.readAsDataURL(audioBlob);
@@ -179,12 +321,12 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
           const textFallback = spokenTextRef.current.trim();
           processVoiceTurn(base64Audio, textFallback);
         };
-        stream.getTracks().forEach(track => track.stop());
       };
 
       mediaRecorderRef.current.start();
       setOrbState('listening');
-      setLiveTranscript('Listening to you...');
+      setLiveTranscript('Listening… I’ll stop automatically when you finish.');
+      startVoiceActivityMonitor(stream);
     } catch (err) {
       console.error("Mic access error:", err);
       alert("Microphone access is required for voice mode.");
@@ -193,13 +335,39 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
   };
 
   const stopListening = () => {
-    if (recognitionRef.current) {
-      try { recognitionRef.current.stop(); } catch (e) {}
-    }
-    if (mediaRecorderRef.current && orbState === 'listening') {
+    stopRecognition();
+    if (mediaRecorderRef.current?.state === 'recording') {
       mediaRecorderRef.current.stop();
       setOrbState('thinking');
     }
+  };
+
+  const beginBargeIn = () => {
+    if (!speakingRef.current || processingRef.current) return;
+    speakingRef.current = false;
+    audioPlayerRef.current.pause();
+    audioPlayerRef.current.currentTime = 0;
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    stopRecognition();
+    setLiveTranscript('Listening for your interruption…');
+    // Reuse the noise-suppressed stream and let the normal silence detector
+    // finish the new utterance automatically.
+    startListening();
+  };
+
+  const interruptTutor = (text) => {
+    if (processingRef.current || !speakingRef.current) return;
+    processingRef.current = true;
+    speakingRef.current = false;
+    audioPlayerRef.current.pause();
+    audioPlayerRef.current.currentTime = 0;
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    stopRecognition();
+    setLiveTranscript(`"${text}"`);
+    setOrbState('thinking');
+    processVoiceTurn(null, text).finally(() => {
+      processingRef.current = false;
+    });
   };
 
   const handleOrbClick = () => {
@@ -220,7 +388,10 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
           challenge_id: 'freeform_inquiry',
           unit_id: 'physics_mechanics',
           text: textFallback || null,
-          audio_base64: audioBase64 || null
+          // A confidence-filtered browser transcript is faster and avoids
+          // transcribing the same interruption twice. Whisper remains the
+          // fallback when browser speech recognition is unavailable.
+          audio_base64: textFallback ? null : (audioBase64 || null)
         })
       });
 
@@ -253,6 +424,8 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
     }
   };
 
+  interruptionHandlerRef.current = interruptTutor;
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-140px)] max-w-3xl mx-auto px-4 py-8 text-center select-none space-y-8 animate-in fade-in duration-500">
       {/* Clean Minimal Headline */}
@@ -276,11 +449,11 @@ export const MinimalVoiceStudio = ({ sessionId, onStateUpdate }) => {
         {/* State Label */}
         <span className="text-xs font-mono tracking-widest text-slate-400 uppercase font-medium">
           {orbState === 'listening'
-            ? '● Listening (Click to finish speaking)'
+            ? '● Listening (auto-stops after silence)'
             : orbState === 'thinking'
             ? '✦ Formulating Teacher Response...'
             : orbState === 'speaking'
-            ? '▶ Socratic Teacher Speaking'
+            ? '▶ Speaking (speak to interrupt)'
             : 'Click Silver Orb to Speak'}
         </span>
       </div>
