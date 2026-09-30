@@ -88,7 +88,7 @@ class SocraticPolicyEngine:
             return None
         normalized = topic.lower().strip()
         for marker, label in cls.TOPIC_ALIASES:
-            if marker in normalized:
+            if re.search(rf"\b{re.escape(marker)}", normalized):
                 return label
         return topic.strip().title()
 
@@ -101,10 +101,23 @@ class SocraticPolicyEngine:
         return concept_id[:120] or None
 
     @staticmethod
+    def is_question(text_lower: str) -> bool:
+        """True when the learner is asking rather than answering. Checks the
+        start of the utterance so answers such as "however it moves, it needs
+        a force" are still graded."""
+        text_lower = text_lower.strip()
+        if text_lower.endswith("?"):
+            return True
+        if re.match(r"^(what|why|how|when|where|which|who|is|are|does|do|can|could|would|should)\b(?!['’])(?!\s+not\b)", text_lower):
+            return True
+        return any(m in text_lower for m in ["can you explain", "could you explain", "difference between", "meaning of", "what does"])
+
+    @staticmethod
     def _extract_topic(text_lower: str, current_topic: Optional[str] = None) -> Optional[str]:
         """Return a readable topic only when the learner actually supplied one."""
         for marker, label in SocraticPolicyEngine.TOPIC_ALIASES:
-            if marker in text_lower:
+            # Word-start match: "waves" -> Waves, but "homework" is not Work.
+            if re.search(rf"\b{re.escape(marker)}", text_lower):
                 return label
 
         # Covers natural language such as “teach me integration” without
@@ -192,7 +205,7 @@ class SocraticPolicyEngine:
         # 2. DOUBT CHECK / CLARIFICATION PHASE
         # =========================================================================
         # Check if student says "no doubts", "i understand", "i'm ready", "let's test"
-        no_doubts_keywords = ["no doubts", "no doubt", "no questions", "no question", "i have none", "nothing else", "i understand", "understood", "all clear", "i'm ready", "im ready", "let's test", "lets test", "ask me", "yes i got it", "yes i understand", "makes sense", "got it"]
+        no_doubts_keywords = ["no doubts", "no doubt", "no questions", "no question", "i have none", "nothing else", "i understand", "understood", "all clear", "i'm ready", "im ready", "let's test", "lets test", "ask me", "yes i got it", "yes i understand", "makes sense", "got it", "harder challenge", "another challenge", "challenge me", "test me", "quiz me"]
         has_no_doubts = any(k in text_lower for k in no_doubts_keywords)
 
         if current_phase in [LessonPhase.TOPIC_TEACHING, LessonPhase.DOUBT_CHECK, LessonPhase.RESOLVING_DOUBT]:
@@ -221,8 +234,7 @@ class SocraticPolicyEngine:
 
         # A learner can ask for clarification during a challenge or after a
         # hint. Treat it as a doubt instead of incorrectly grading the question.
-        question_markers = ["what is", "why", "how", "can you explain", "what does", "difference between", "meaning of"]
-        if any(marker in text_lower for marker in question_markers) or text_lower.endswith("?"):
+        if SocraticPolicyEngine.is_question(text_lower):
             return SocraticDirective(
                 tier=InterventionTier.CONCEPTUAL_EXPLANATION,
                 lesson_phase=LessonPhase.RESOLVING_DOUBT,
@@ -247,8 +259,23 @@ class SocraticPolicyEngine:
                 forbidden_tokens=[]
             )
 
+        sound = diagnostic.reasoning_soundness_score >= 0.85 and not diagnostic.is_correct_answer_with_flawed_reasoning
+
+        # The learner has now solved the transfer problem as well: recovery is
+        # verified. Close the loop instead of serving transfer problems forever.
+        if sound and current_phase == LessonPhase.TRANSFER_CHECK:
+            topic_name = current_topic or "the topic"
+            return SocraticDirective(
+                tier=InterventionTier.CONCEPTUAL_EXPLANATION,
+                lesson_phase=LessonPhase.DOUBT_CHECK,
+                topic=topic_name,
+                pedagogical_goal=f"The learner solved the transfer problem, so their understanding of {topic_name} is verified. Congratulate them specifically, summarise the principle in one sentence, and ask whether they want a harder challenge or a new topic.",
+                allowed_information_scope="Summary of the verified principle.",
+                forbidden_tokens=[]
+            )
+
         # Student's reasoning is sound (> 0.85)
-        if diagnostic.reasoning_soundness_score >= 0.85 and not diagnostic.is_correct_answer_with_flawed_reasoning:
+        if sound:
             return SocraticDirective(
                 tier=InterventionTier.TRANSFER_VERIFICATION,
                 lesson_phase=LessonPhase.TRANSFER_CHECK,

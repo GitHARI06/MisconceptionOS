@@ -1,6 +1,7 @@
 import json
 import os
 import logging
+import threading
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 from .models import LearnerProfile, ConceptMastery, DiagnosticEvidence, InterventionTier
@@ -13,9 +14,10 @@ logger = logging.getLogger("misconception_os.memory")
 class LearnerMemoryManager:
     def __init__(self, store_path: Optional[str] = None):
         if store_path is None:
-            store_path = os.path.join(settings.DATA_DIR, "learner_store.json")
+            store_path = settings.LEARNER_STORE_PATH
         self.store_path = store_path
         self.profiles: Dict[str, LearnerProfile] = {}
+        self._lock = threading.Lock()
         self.load_store()
         
     def load_store(self):
@@ -31,13 +33,22 @@ class LearnerMemoryManager:
             self.profiles = {}
 
     def save_store(self):
+        # Write to a temp file and atomically swap it in, so a crash or two
+        # overlapping requests can never leave a truncated, unreadable store.
         try:
-            os.makedirs(os.path.dirname(self.store_path), exist_ok=True)
-            with open(self.store_path, "w", encoding="utf-8") as f:
-                data = {sid: p.model_dump() for sid, p in self.profiles.items()}
-                json.dump(data, f, indent=2)
+            with self._lock:
+                os.makedirs(os.path.dirname(self.store_path) or ".", exist_ok=True)
+                data = {sid: p.model_dump(mode="json") for sid, p in self.profiles.items()}
+                tmp_path = f"{self.store_path}.tmp"
+                with open(tmp_path, "w", encoding="utf-8") as f:
+                    json.dump(data, f, indent=2)
+                os.replace(tmp_path, self.store_path)
         except Exception as e:
             logger.error(f"Error saving learner store: {e}")
+
+    def get_profile(self, session_id: str) -> Optional[LearnerProfile]:
+        """Read-only lookup: viewing a session must not register a learner."""
+        return self.profiles.get(session_id)
 
     def get_or_create_profile(self, session_id: str, unit_id: str = "physics_mechanics") -> LearnerProfile:
         if session_id not in self.profiles:
@@ -63,11 +74,21 @@ class LearnerMemoryManager:
         tier: InterventionTier,
         current_phase=None,
         current_topic: Optional[str] = None,
-        concept_id: Optional[str] = None
+        concept_id: Optional[str] = None,
+        graded: bool = True
     ) -> LearnerProfile:
         profile = self.get_or_create_profile(session_id)
         cid = diagnostic.affected_concept_id
-        
+        if cid in (None, "", "general_inquiry") and concept_id:
+            # Keep evidence under the lesson's concept rather than a generic bucket.
+            cid = concept_id
+
+        # Only answers to a challenge are evidence of mastery. Greetings,
+        # topic requests and doubt questions are logged but must not lower
+        # mastery or count towards the "stuck" escalation.
+        if not graded:
+            cid = None
+
         if cid and cid not in profile.concept_states:
             profile.concept_states[cid] = ConceptMastery(
                 concept_id=cid,
@@ -116,6 +137,9 @@ class LearnerMemoryManager:
             "category": diagnostic.category.value,
             "evidence": diagnostic.pedagogical_reason,
             "confidence": diagnostic.confidence,
+            "reasoning_soundness": diagnostic.reasoning_soundness_score,
+            "topic": current_topic,
+            "graded": graded,
             "is_lucky_guess": diagnostic.is_correct_answer_with_flawed_reasoning
         }
         profile.conversation_history.append(turn)

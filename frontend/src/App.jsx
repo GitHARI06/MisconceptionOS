@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { MinimalVoiceStudio } from './components/MinimalVoiceStudio';
 import { TeacherHUD } from './components/TeacherHUD';
-import { WebGroundingViewer } from './components/WebGroundingViewer';
 import { QuizArena } from './components/QuizArena';
+import { KnowledgeLibrary } from './components/KnowledgeLibrary';
+import { Plus } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('voice'); // 'voice' | 'teacher' | 'grounding' | 'quiz'
+  const [activeTab, setActiveTab] = useState('voice'); // 'voice' | 'teacher' | 'quiz'
   const [sessionId, setSessionId] = useState(() => {
     const storageKey = 'misconceptionos-learner-session';
     const existingId = window.localStorage.getItem(storageKey);
@@ -15,7 +16,10 @@ export default function App() {
     return newId;
   });
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
   const [conceptHistory, setConceptHistory] = useState({});
+  const [historySearch, setHistorySearch] = useState('');
+  const [resumedTopic, setResumedTopic] = useState(null);
   const [account, setAccount] = useState(null);
   const [accountOpen, setAccountOpen] = useState(false);
   const [authMode, setAuthMode] = useState('login');
@@ -88,7 +92,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-black text-slate-100 flex flex-col justify-between selection:bg-teal-500 selection:text-white font-['Plus_Jakarta_Sans',sans-serif]">
       {/* Sleek Minimal Top Navigation (ChatGPT Style) */}
-      <header className="px-6 py-4 flex items-center justify-between z-50">
+      <header className="px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3 z-50">
         {/* Left: Minimal Brand */}
         <div className="flex items-center gap-2">
           <button
@@ -100,13 +104,13 @@ export default function App() {
           >
             MisconceptionOS
           </button>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-900 text-slate-400 border border-slate-800">
+          <span className="hidden sm:inline text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-900 text-slate-400 border border-slate-800">
             Socratic AI
           </span>
         </div>
 
         {/* Right: Clean Switchers */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2 max-w-full">
           <button
             type="button"
             onClick={() => { setAuthError(''); setAccountOpen(true); }}
@@ -114,7 +118,7 @@ export default function App() {
           >
             {account ? `${account.username} · ${account.class_level}` : 'Student account'}
           </button>
-          <div className="flex items-center gap-1.5 p-1 bg-slate-900/80 rounded-full border border-slate-800 backdrop-blur-md">
+          <div className="flex items-center gap-1.5 p-1 bg-slate-900/80 rounded-full border border-slate-800 backdrop-blur-md max-w-full overflow-x-auto whitespace-nowrap">
           <button
             onClick={() => setActiveTab('voice')}
             className={`px-3.5 py-1 rounded-full text-xs font-medium transition ${
@@ -136,16 +140,6 @@ export default function App() {
             Diagnostic HUD
           </button>
           <button
-            onClick={() => setActiveTab('grounding')}
-            className={`px-3.5 py-1 rounded-full text-xs font-medium transition ${
-              activeTab === 'grounding'
-                ? 'bg-cyan-950/60 text-cyan-300 border border-cyan-800/40 shadow'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Web Grounding
-          </button>
-          <button
             onClick={() => setActiveTab('quiz')}
             className={`px-3.5 py-1 rounded-full text-xs font-medium transition ${
               activeTab === 'quiz'
@@ -155,6 +149,16 @@ export default function App() {
           >
             Concept Quiz
           </button>
+          <button
+            type="button"
+            onClick={() => setLibraryOpen(true)}
+            aria-label="Add documents to the knowledge library"
+            title="Add PDFs or notes"
+            className="sticky right-0 ml-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-600 text-white shadow-[0_0_0_4px_rgba(15,23,42,0.9)] transition hover:bg-cyan-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+
           </div>
         </div>
       </header>
@@ -217,27 +221,72 @@ export default function App() {
             ×
           </button>
         </div>
+        <div className="border-b border-slate-800 px-4 py-3">
+          <label htmlFor="history-search" className="sr-only">Search learning history</label>
+          <div className="relative">
+            <span aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-500">⌕</span>
+            <input
+              id="history-search"
+              type="search"
+              value={historySearch}
+              onChange={(event) => setHistorySearch(event.target.value)}
+              placeholder="Search concepts…"
+              className="w-full rounded-lg border border-slate-700 bg-slate-950 py-2 pl-9 pr-3 text-xs text-white outline-none placeholder:text-slate-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/40"
+            />
+          </div>
+        </div>
         <div className="h-[calc(100%-73px)] overflow-y-auto px-4 py-4">
           {Object.keys(conceptHistory).length === 0 ? (
             <p className="rounded-lg border border-dashed border-slate-800 px-3 py-4 text-xs leading-5 text-slate-500">
               Physics concepts you explore will appear here and remain available when you return.
             </p>
           ) : (
-            <div className="space-y-3">
-              {Object.entries(conceptHistory).map(([conceptId, turns]) => {
+            (() => {
+              const query = historySearch.trim().toLowerCase();
+              const filteredHistory = Object.entries(conceptHistory).filter(([conceptId, turns]) => {
+                if (!query) return true;
+                const searchableText = [
+                  conceptId,
+                  ...turns.flatMap((turn) => [turn.topic, turn.user, turn.assistant]),
+                ].filter(Boolean).join(' ').toLowerCase();
+                return searchableText.includes(query);
+              });
+
+              if (filteredHistory.length === 0) {
+                return (
+                  <p className="rounded-lg border border-dashed border-slate-800 px-3 py-4 text-xs leading-5 text-slate-500">
+                    No matching physics concept found. Try another keyword.
+                  </p>
+                );
+              }
+
+              return <div className="space-y-3">
+              {filteredHistory.map(([conceptId, turns]) => {
                 const latestTurn = turns[turns.length - 1];
                 const topic = latestTurn?.topic || conceptId.replaceAll('_', ' ');
                 return (
-                  <div key={conceptId} className="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+                  <button
+                    key={conceptId}
+                    type="button"
+                    onClick={() => {
+                      setResumedTopic({ conceptId, topic });
+                      setActiveTab('voice');
+                      setHistoryOpen(false);
+                    }}
+                    className="w-full rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-left transition hover:border-cyan-700 hover:bg-cyan-950/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                    aria-label={`Continue learning ${topic}`}
+                  >
                     <p className="text-sm font-semibold capitalize text-cyan-200">{topic}</p>
                     <p className="mt-1 text-[10px] font-mono uppercase tracking-wide text-slate-500">
                       {turns.length} {turns.length === 1 ? 'conversation' : 'conversations'}
                     </p>
                     <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-400">{latestTurn?.user}</p>
-                  </div>
+                    <p className="mt-2 text-[10px] font-mono uppercase tracking-wide text-cyan-500">Click to continue</p>
+                  </button>
                 );
               })}
-            </div>
+              </div>;
+            })()
           )}
         </div>
       </aside>
@@ -255,7 +304,10 @@ export default function App() {
       <main className="flex-1 flex flex-col justify-center px-4">
         {activeTab === 'voice' && (
           <MinimalVoiceStudio
+            key={sessionId}
             sessionId={sessionId}
+            learnerName={account?.username || null}
+            resumeTopic={resumedTopic?.topic || null}
             onStateUpdate={() => {
               if (historyOpen) refreshHistory();
             }}
@@ -271,11 +323,7 @@ export default function App() {
           </div>
         )}
 
-        {activeTab === 'grounding' && (
-          <div className="max-w-4xl mx-auto w-full py-6">
-            <WebGroundingViewer />
-          </div>
-        )}
+
 
         {activeTab === 'quiz' && (
           <div className="max-w-5xl mx-auto w-full py-6">
@@ -288,6 +336,7 @@ export default function App() {
       <footer className="py-3 text-center text-[10px] font-mono text-slate-600">
         Pure Voice Interaction • Click the Silver Orb to speak • Socratic Anti-Leakage Guard Active
       </footer>
+      <KnowledgeLibrary open={libraryOpen} onClose={() => setLibraryOpen(false)} />
     </div>
   );
 }

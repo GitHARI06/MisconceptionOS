@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, BrainCircuit, Activity, CheckCircle2, AlertTriangle, HelpCircle, RefreshCw, Send, FileText, ClipboardCheck, CalendarDays } from 'lucide-react';
+import { BrainCircuit, Activity, CheckCircle2, AlertTriangle, HelpCircle, RefreshCw, FileText, ClipboardCheck, CalendarDays, Trash2 } from 'lucide-react';
 import { FormattedMathText } from '../utils/katexHelper';
 
 export const TeacherHUD = ({ sessionId, unitId }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [overrideConcept, setOverrideConcept] = useState('');
-  const [overrideValue, setOverrideValue] = useState(0.85);
-  const [overrideNote, setOverrideNote] = useState('');
-  const [overrideMsg, setOverrideMsg] = useState('');
   const [reportMsg, setReportMsg] = useState('');
+  const [clearMsg, setClearMsg] = useState('');
 
   const fetchTeacherData = async () => {
     if (!sessionId) return;
@@ -56,27 +53,36 @@ export const TeacherHUD = ({ sessionId, unitId }) => {
     return () => clearInterval(interval);
   }, [sessionId]);
 
-  const handleOverrideSubmit = async (e) => {
-    e.preventDefault();
-    if (!overrideConcept) return;
+  const handleClearPlan = async (attempt) => {
+    if (!window.confirm(`Remove the entire ${attempt.topic} quiz and study schedule from the Diagnostic HUD?`)) return;
     try {
-      const res = await fetch('/api/teacher/override', {
+      const response = await fetch('/api/quiz/clear-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          session_id: sessionId,
-          concept_id: overrideConcept,
-          override_mastery_prob: parseFloat(overrideValue),
-          teacher_note: overrideNote || "Teacher manual calibration"
-        })
+        body: JSON.stringify({ session_id: sessionId, concept_id: attempt.concept_id })
       });
-      if (res.ok) {
-        setOverrideMsg('Override recorded successfully in audit trail!');
-        fetchTeacherData();
-        setTimeout(() => setOverrideMsg(''), 4000);
-      }
-    } catch (err) {
-      console.error(err);
+      if (!response.ok) throw new Error('Unable to clear this schedule.');
+      setClearMsg(`${attempt.topic} quiz and schedule removed from the HUD.`);
+      fetchTeacherData();
+      setTimeout(() => setClearMsg(''), 4000);
+    } catch (error) {
+      setClearMsg(error.message || 'Unable to clear this schedule.');
+    }
+  };
+
+  const handleClearAllPlans = async () => {
+    if (!window.confirm('Remove every quiz result and study schedule from this session? This cannot be undone.')) return;
+    try {
+      const response = await fetch('/api/quiz/clear-plan', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId })
+      });
+      if (!response.ok) throw new Error('Unable to clear the schedules.');
+      setClearMsg('All quiz results and study schedules were removed from the HUD.');
+      fetchTeacherData();
+      setTimeout(() => setClearMsg(''), 4000);
+    } catch (error) {
+      setClearMsg(error.message || 'Unable to clear the schedules.');
     }
   };
 
@@ -209,10 +215,12 @@ export const TeacherHUD = ({ sessionId, unitId }) => {
               Quiz evidence is linked to the learned concept and used to create an adaptive plan based on the learner's available study time.
             </p>
           </div>
-          <span className="text-[11px] font-mono text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-2 py-1">
-            Default: 1 hr/day
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-mono text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-2 py-1">Default: 1 hr/day</span>
+            {data?.quiz_attempts?.some((attempt) => !attempt.study_plan_cleared) && <button type="button" onClick={handleClearAllPlans} className="flex items-center gap-1 rounded-full border border-rose-800/60 px-2 py-1 text-[11px] text-rose-300 hover:bg-rose-950/30"><Trash2 className="w-3 h-3" /> Clear all schedules</button>}
+          </div>
         </div>
+        {clearMsg && <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs rounded-lg">{clearMsg}</div>}
 
         {data && data.quiz_attempts && data.quiz_attempts.length > 0 ? (
           <div className="space-y-3">
@@ -230,12 +238,15 @@ export const TeacherHUD = ({ sessionId, unitId }) => {
                         {attempt.created_at ? new Date(attempt.created_at).toLocaleString() : 'Recent attempt'} • {attempt.hours_per_day} hr/day
                       </p>
                     </div>
-                    <div className={`text-sm font-bold px-2.5 py-1 rounded-lg border ${percentage >= 70 ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30' : 'text-amber-300 bg-amber-500/10 border-amber-500/30'}`}>
-                      {attempt.score}/{attempt.total} ({percentage}%)
+                    <div className="flex items-center gap-2">
+                      <div className={`text-sm font-bold px-2.5 py-1 rounded-lg border ${percentage >= 70 ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30' : 'text-amber-300 bg-amber-500/10 border-amber-500/30'}`}>
+                        {attempt.score}/{attempt.total} ({percentage}%)
+                      </div>
+                      {!attempt.study_plan_cleared && <button type="button" onClick={() => handleClearPlan(attempt)} className="flex items-center gap-1 rounded-lg border border-rose-800/60 px-2 py-1 text-[11px] text-rose-300 hover:bg-rose-950/30" title="Clear this study schedule"><Trash2 className="w-3 h-3" /> Clear schedule</button>}
                     </div>
                   </div>
 
-                  {attempt.study_plan && (
+                  {attempt.study_plan && attempt.study_plan.schedule?.length > 0 ? (
                     <div className="p-3 bg-teal-950/20 border border-teal-900/40 rounded-lg">
                       <div className="flex items-center gap-2 text-teal-300 text-xs font-semibold">
                         <CalendarDays className="w-3.5 h-3.5" />
@@ -245,16 +256,19 @@ export const TeacherHUD = ({ sessionId, unitId }) => {
                       {attempt.study_plan.goal && <p className="text-xs text-slate-300 mt-1">{attempt.study_plan.goal}</p>}
                       {schedule.length > 0 && (
                         <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
-                          {schedule.slice(0, 6).map((day, dayIndex) => (
-                            <div key={`${day.day || dayIndex}-${dayIndex}`} className="p-2 bg-slate-950/70 border border-slate-800 rounded-lg text-[11px]">
-                              <div className="text-cyan-300 font-mono">Day {day.day || dayIndex + 1} • {day.minutes || 60} min</div>
+                          {schedule.slice(0, 6).map((day, dayIndex) => {
+                            const completed = (attempt.completed_days || []).includes(day.day || dayIndex + 1);
+                            return <div key={`${day.day || dayIndex}-${dayIndex}`} className={`p-2 bg-slate-950/70 border rounded-lg text-[11px] ${completed ? 'border-emerald-500/40' : 'border-slate-800'}`}>
+                              <div className={`font-mono flex items-center gap-1 ${completed ? 'text-emerald-300' : 'text-cyan-300'}`}>{completed && <CheckCircle2 className="w-3 h-3" />}Day {day.day || dayIndex + 1} • {day.minutes || 60} min{completed ? ' • Completed' : ''}</div>
                               <div className="text-slate-200 mt-1">{day.focus || 'Concept practice'}</div>
                               {day.checkpoint && <div className="text-slate-500 mt-1">Checkpoint: {day.checkpoint}</div>}
-                            </div>
-                          ))}
+                            </div>;
+                          })}
                         </div>
                       )}
                     </div>
+                  ) : (
+                    <div className="p-3 rounded-lg border border-dashed border-slate-700 text-xs text-slate-500">Schedule cleared. The quiz score remains available as diagnostic evidence.</div>
                   )}
                 </div>
               );
@@ -279,12 +293,24 @@ export const TeacherHUD = ({ sessionId, unitId }) => {
 
         <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
           {data && data.conversation_history && data.conversation_history.length > 0 ? (
-            data.conversation_history.map((turn, idx) => (
+            data.conversation_history.map((turn, idx) => (turn.type === 'TEACHER_OVERRIDE' || turn.timestamp === 'TEACHER_OVERRIDE') ? (
+              <div key={idx} className="p-3 bg-amber-950/20 border border-amber-800/40 rounded-xl text-xs space-y-1">
+                <div className="font-mono text-amber-300">
+                  Teacher override • {turn.timestamp && turn.timestamp !== 'TEACHER_OVERRIDE' ? new Date(turn.timestamp).toLocaleTimeString() : 'Recorded'}
+                </div>
+                <p className="text-slate-200">
+                  Mastery of <span className="font-mono">{turn.concept_id}</span> set to {Math.round((turn.new_mastery || 0) * 100)}%
+                  {turn.teacher_note ? ` — ${turn.teacher_note}` : ''}
+                </p>
+              </div>
+            ) : (
               <div key={idx} className="p-3 bg-slate-950 border border-slate-800/80 rounded-xl space-y-2">
                 <div className="flex items-center justify-between text-xs text-slate-400">
                   <span className="font-mono">Turn #{idx + 1} • {turn.timestamp ? new Date(turn.timestamp).toLocaleTimeString() : 'Recent'}</span>
                   <div className="flex items-center gap-2">
-                    {turn.category && getCategoryBadge(turn.category)}
+                    {turn.graded && turn.reasoning_soundness >= 0.85 && !turn.is_lucky_guess ? (
+                      <span className="px-2 py-0.5 rounded text-xs bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Sound Reasoning</span>
+                    ) : turn.category && getCategoryBadge(turn.category)}
                     <span className="px-2 py-0.5 rounded text-xs bg-slate-800 text-teal-300 border border-slate-700 font-mono">
                       Tier: {turn.tier}
                     </span>
@@ -315,72 +341,6 @@ export const TeacherHUD = ({ sessionId, unitId }) => {
         </div>
       </div>
 
-      {/* Teacher Calibration & Override Panel */}
-      <div className="p-5 bg-slate-900 border border-slate-800 rounded-2xl space-y-3">
-        <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-          <ShieldAlert className="w-4 h-4 text-amber-400" />
-          Teacher Knowledge Calibration & Manual Override
-        </h3>
-        <p className="text-xs text-slate-400">
-          Teachers can manually calibrate a student's concept mastery or log custom clinical observations.
-        </p>
-
-        {overrideMsg && (
-          <div className="p-2.5 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs rounded-lg font-mono">
-            {overrideMsg}
-          </div>
-        )}
-
-        <form onSubmit={handleOverrideSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2">
-          <div>
-            <label className="block text-[11px] font-mono text-slate-400 mb-1">Concept</label>
-            <select
-              value={overrideConcept}
-              onChange={(e) => setOverrideConcept(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded-lg p-2 focus:ring-1 focus:ring-teal-500 focus:outline-none"
-            >
-              <option value="">Select Concept...</option>
-              {data && data.concept_states && Object.values(data.concept_states).filter((c) => c.total_attempts > 0 || c.recovery_verified || (c.misconceptions_logged && c.misconceptions_logged.length > 0)).map(c => (
-                <option key={c.concept_id} value={c.concept_id}>{c.concept_name}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-mono text-slate-400 mb-1">Calibrated Mastery (0.0 - 1.0)</label>
-            <input
-              type="number"
-              min="0"
-              max="1"
-              step="0.05"
-              value={overrideValue}
-              onChange={(e) => setOverrideValue(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded-lg p-2 focus:ring-1 focus:ring-teal-500 focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-mono text-slate-400 mb-1">Teacher Note / Rationale</label>
-            <input
-              type="text"
-              placeholder="e.g. Oral exam showed sound intuition"
-              value={overrideNote}
-              onChange={(e) => setOverrideNote(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded-lg p-2 focus:ring-1 focus:ring-teal-500 focus:outline-none"
-            />
-          </div>
-
-          <div className="flex items-end">
-            <button
-              type="submit"
-              className="w-full bg-teal-600 hover:bg-teal-500 text-white font-semibold text-xs py-2.5 px-4 rounded-lg flex items-center justify-center gap-1.5 transition"
-            >
-              <Send className="w-3.5 h-3.5" />
-              Save Override
-            </button>
-          </div>
-        </form>
-      </div>
     </div>
   );
 };

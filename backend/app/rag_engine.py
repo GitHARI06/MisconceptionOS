@@ -3,10 +3,20 @@ import os
 import logging
 import re
 from typing import Dict, List, Any, Optional
-from duckduckgo_search import DDGS
 from .config import settings
 
 logger = logging.getLogger("misconception_os.rag")
+
+# Everyday words that must never count as evidence that a query is about
+# physics when it is matched against the local corpus.
+STOPWORDS = {
+    "what", "are", "the", "and", "for", "why", "how", "with", "about", "this", "that", "from",
+    "into", "your", "you", "tell", "help", "please", "can", "does", "did", "who", "when", "where",
+    "which", "will", "would", "should", "could", "have", "has", "had", "was", "were", "been",
+    "its", "they", "them", "their", "there", "then", "than", "some", "any", "our", "out", "not",
+    "but", "all", "one", "two", "use", "used", "using", "make", "like", "just", "more", "most",
+    "explain", "give", "show", "write", "need", "want", "know", "learn", "teach", "study",
+}
 
 class KnowledgeRetriever:
     def __init__(self, data_path: Optional[str] = None):
@@ -42,6 +52,21 @@ class KnowledgeRetriever:
     def get_challenge(self, challenge_id: str) -> Optional[Dict[str, Any]]:
         return self.challenges.get(challenge_id)
         
+    # Keywords that identify a curriculum challenge when the tutor presents
+    # it in free-form conversation (the UI always sends "freeform_inquiry").
+    CHALLENGE_SIGNATURES = {
+        "CHALLENGE_01_INERTIA": [("puck",), ("frictionless", "ice")],
+        "CHALLENGE_02_FREEFALL": [("bowling",), ("vacuum", "ball"), ("vacuum", "feather")],
+        "CHALLENGE_03_PEAK_ACCEL": [("pendulum", "highest"), ("pendulum", "turning point")],
+    }
+
+    def infer_challenge(self, text: str) -> Optional[Dict[str, Any]]:
+        text = (text or "").lower()
+        for challenge_id, signatures in self.CHALLENGE_SIGNATURES.items():
+            if any(all(word in text for word in signature) for signature in signatures):
+                return self.get_challenge(challenge_id)
+        return None
+
     def get_unit_concepts(self, unit_id: str = "physics_mechanics") -> List[Dict[str, Any]]:
         return [c for c in self.concepts.values() if c.get("unit_id") == unit_id]
         
@@ -84,8 +109,12 @@ Known Student Misconceptions & Pedagogical Counter-Examples:
         if not query:
             return "Enter a physics concept or question to retrieve grounding."
 
+        if not settings.ENABLE_WEB_SEARCH:
+            return self._local_grounding(query)
+
         try:
-            with DDGS() as ddgs:
+            from duckduckgo_search import DDGS
+            with DDGS(timeout=settings.WEB_SEARCH_TIMEOUT_SECONDS) as ddgs:
                 results = list(ddgs.text(f"physics misconception explanation {query}", max_results=max_results))
                 snippets = [f"[{r.get('title', '')}]: {r.get('body', '')}" for r in results]
                 if snippets:
@@ -99,7 +128,7 @@ Known Student Misconceptions & Pedagogical Counter-Examples:
         """Return relevant, inspectable snippets when live retrieval is empty."""
         terms = {
             token.rstrip("s") for token in re.findall(r"[a-z0-9]+", query.lower())
-            if len(token) > 2 and token not in {"what", "are", "the", "and", "for", "why", "how"}
+            if len(token) > 2 and token not in STOPWORDS
         }
         candidates = []
 

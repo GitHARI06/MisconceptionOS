@@ -35,6 +35,12 @@ class StudentInput(BaseModel):
     audio_base64: Optional[str] = None
     current_phase: Optional[LessonPhase] = None
     topic: Optional[str] = None
+    # "inline": return the reply audio as base64 in this response (slower).
+    # "stream": return a tts_url the browser plays while it is synthesised.
+    # "none":   text only.
+    voice_mode: str = "inline"
+    # Name from the signed-in account, so the tutor can greet the learner.
+    learner_name: Optional[str] = None
 
 class RegisterRequest(BaseModel):
     username: str
@@ -82,6 +88,14 @@ class SocraticTurnResult(BaseModel):
     transfer_ready: bool = False
     transfer_question: Optional[str] = None
     learner_mastery: Dict[str, float] = {}
+    tts_url: Optional[str] = None
+    stt_source: Optional[str] = None
+    speech_rate: int = 0
+    learner_name: Optional[str] = None
+    # True when the "learner" utterance was the tutor's own voice picked up by
+    # the microphone; nothing was recorded and the client should just listen.
+    echo_detected: bool = False
+    sources: List[Dict[str, Any]] = []
     timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
 
 class ConceptMastery(BaseModel):
@@ -105,6 +119,10 @@ class LearnerProfile(BaseModel):
     current_tier: InterventionTier = InterventionTier.DIAGNOSTIC_PROBE
     stuckness_turn_count: int = 0
     active_misconception_id: Optional[str] = None
+    # Preferred speaking pace for the tutor voice, in percent (-40..+30).
+    speech_rate: int = 0
+    # Index into conversation_history where the current sitting began (for recaps).
+    session_start_index: int = 0
     created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
     updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
 

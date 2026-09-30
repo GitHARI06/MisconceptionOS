@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { CheckCircle2, Circle } from 'lucide-react';
 
 export const QuizArena = ({ sessionId }) => {
   const [quizzes, setQuizzes] = useState([]);
@@ -9,6 +10,7 @@ export const QuizArena = ({ sessionId }) => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [completedDays, setCompletedDays] = useState([]);
 
   const loadQuizzes = async () => {
     setLoading(true);
@@ -44,11 +46,29 @@ export const QuizArena = ({ sessionId }) => {
       if (!response.ok) throw new Error(payload.detail || 'The quiz could not be submitted.');
       if (!payload.study_plan) throw new Error('The quiz was scored, but no study plan was returned.');
       setResult(payload);
+      setCompletedDays(payload.completed_days || []);
     } catch (submitError) {
       console.error(submitError);
       setError(submitError.message || 'The quiz could not be submitted. Please try again.');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const toggleDay = async (day) => {
+    if (!result || !selected) return;
+    const completed = !completedDays.includes(day);
+    try {
+      const response = await fetch('/api/quiz/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId, concept_id: selected.concept_id, day, completed })
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.detail || 'Unable to update study progress.');
+      setCompletedDays(payload.completed_days || []);
+    } catch (progressError) {
+      setError(progressError.message || 'Unable to update study progress.');
     }
   };
 
@@ -68,10 +88,10 @@ export const QuizArena = ({ sessionId }) => {
       </div>
       {error && <div className="rounded-xl border border-rose-800/60 bg-rose-950/20 px-4 py-3 text-xs text-rose-200">{error}</div>}
       {selected && !result && <div className="space-y-4">
-        {selected.questions.map((question, index) => <div key={question.id} className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5"><p className="text-sm font-medium text-white">{index + 1}. {question.question}</p><div className="mt-3 grid gap-2 sm:grid-cols-2">{question.options.map((option, optionIndex) => <button key={option} onClick={() => { const next = [...answers]; next[index] = optionIndex; setAnswers(next); }} className={`rounded-xl border px-3 py-2 text-left text-xs ${answers[index] === optionIndex ? 'border-cyan-500 bg-cyan-950/50 text-cyan-200' : 'border-slate-700 text-slate-400 hover:border-slate-500'}`}>{option}</button>)}</div></div>)}
+        {selected.questions.map((question, index) => <div key={question.id || index} data-question-index={index} className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5"><p className="text-sm font-medium text-white">{index + 1}. {question.question}</p><div className="mt-3 grid gap-2 sm:grid-cols-2">{question.options.map((option, optionIndex) => <button key={optionIndex} aria-pressed={answers[index] === optionIndex} onClick={() => { const next = [...answers]; next[index] = optionIndex; setAnswers(next); }} className={`rounded-xl border px-3 py-2 text-left text-xs ${answers[index] === optionIndex ? 'border-cyan-500 bg-cyan-950/50 text-cyan-200' : 'border-slate-700 text-slate-400 hover:border-slate-500'}`}>{option}</button>)}</div></div>)}
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-950/60 p-4"><label className="text-xs text-slate-400">Daily study time (hours)<input type="number" min="0.25" max="12" step="0.25" value={hours} onChange={(event) => setHours(event.target.value)} className="ml-3 w-20 rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-white" /></label><button onClick={submitQuiz} disabled={submitting || !selected.questions.every((_, index) => Number.isInteger(answers[index]))} className="rounded-xl bg-cyan-600 px-5 py-2.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40">{submitting ? 'Scoring quiz…' : 'Submit quiz'}</button></div>
       </div>}
-      {result && <div className="space-y-4 rounded-3xl border border-cyan-800/50 bg-slate-900/80 p-6"><p className="text-[10px] font-mono uppercase tracking-[0.18em] text-cyan-400">Result</p><h2 className="text-3xl font-semibold text-white">{result.score}/{result.total} <span className="text-base text-slate-400">({result.percentage}%)</span></h2><div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4"><h3 className="font-semibold text-white">{result.study_plan.title}</h3><p className="mt-1 text-sm text-slate-400">{result.study_plan.goal}</p><div className="mt-4 space-y-3">{result.study_plan.schedule?.map((day) => <div key={day.day} className="border-l-2 border-cyan-600 pl-3"><p className="text-xs font-semibold text-cyan-200">Day {day.day} · {day.minutes} minutes · {day.focus}</p><p className="mt-1 text-xs text-slate-300">{day.activity}</p><div className="mt-2 space-y-1">{day.blocks?.map((block, blockIndex) => <p key={blockIndex} className="text-[11px] text-slate-500">{block.minutes} min · {block.task}</p>)}</div><p className="mt-1 text-[11px] text-slate-400">Checkpoint: {day.checkpoint}</p></div>)}</div></div><button onClick={() => { setResult(null); setAnswers([]); }} className="rounded-xl border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:text-white">Retake quiz</button></div>}
+      {result && <div className="space-y-4 rounded-3xl border border-cyan-800/50 bg-slate-900/80 p-6"><p className="text-[10px] font-mono uppercase tracking-[0.18em] text-cyan-400">Result</p><h2 className="text-3xl font-semibold text-white">{result.score}/{result.total} <span className="text-base text-slate-400">({result.percentage}%)</span></h2><div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4"><h3 className="font-semibold text-white">{result.study_plan.title}</h3><p className="mt-1 text-sm text-slate-400">{result.study_plan.goal}</p><div className="mt-4 space-y-3">{result.study_plan.schedule?.map((day) => { const completed = completedDays.includes(day.day); return <div key={day.day} className={`border-l-2 pl-3 ${completed ? 'border-emerald-500 bg-emerald-950/10' : 'border-cyan-600'}`}><div className="flex items-start justify-between gap-3"><div><p className={`text-xs font-semibold ${completed ? 'text-emerald-300' : 'text-cyan-200'}`}>Day {day.day} · {day.minutes} minutes · {day.focus}</p><p className="mt-1 text-xs text-slate-300">{day.activity}</p></div><button type="button" onClick={() => toggleDay(day.day)} className={`flex shrink-0 items-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-semibold ${completed ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300' : 'border-slate-700 text-slate-500 hover:border-emerald-500/50 hover:text-emerald-300'}`} aria-label={`${completed ? 'Mark day incomplete' : 'Mark day complete'}`} title={completed ? 'Mark day incomplete' : 'Mark day complete'}>{completed ? <CheckCircle2 className="h-4 w-4" /> : <Circle className="h-4 w-4" />} {completed ? 'Completed' : 'Complete day'}</button></div><div className="mt-2 space-y-1">{day.blocks?.map((block, blockIndex) => <p key={blockIndex} className="text-[11px] text-slate-500">{block.minutes} min · {block.task}</p>)}</div><p className="mt-1 text-[11px] text-slate-400">Checkpoint: {day.checkpoint}</p></div>; })}</div></div><button onClick={() => { setResult(null); setAnswers([]); }} className="rounded-xl border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:text-white">Retake quiz</button></div>}
     </div>
   );
 };

@@ -46,6 +46,8 @@ export const WebGroundingViewer = () => {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter' && !loading) fetchGrounding(); }}
+          aria-label="Grounding search query"
           placeholder="Enter concept or query for factual grounding..."
           className="flex-1 bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded-xl px-4 py-2.5 focus:ring-1 focus:ring-teal-500 focus:outline-none font-mono"
         />

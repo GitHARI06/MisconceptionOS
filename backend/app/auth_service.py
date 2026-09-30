@@ -3,12 +3,17 @@
 import base64
 import hashlib
 import hmac
+import logging
+import re
 import secrets
 import time
 import uuid
 from typing import Any, Dict, Optional
 
 from .config import settings
+
+logger = logging.getLogger("misconception_os.auth")
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 class AccountService:
@@ -26,7 +31,8 @@ class AccountService:
                 self._psycopg = psycopg
                 self._dict_row = dict_row
                 self.ensure_schema()
-            except Exception:
+            except Exception as exc:
+                logger.warning("Account storage is unavailable: %s", exc)
                 self._psycopg = None
 
     @property
@@ -86,8 +92,21 @@ class AccountService:
         username = username.strip()
         email = email.strip().lower()
         class_level = class_level.strip()
-        if len(username) < 2 or len(email) < 5 or len(password) < 8 or not class_level:
-            raise ValueError("Username, class, and a password of at least 8 characters are required.")
+        if len(username) < 2 or len(username) > 40 or len(password) < 8 or len(password) > 256 or not class_level:
+            raise ValueError("Username (2-40 characters), class, and a password of at least 8 characters are required.")
+        if not EMAIL_RE.match(email):
+            raise ValueError("Please enter a valid email address.")
+        # Usernames and emails are matched case-insensitively at login, so
+        # they must also be unique case-insensitively.
+        with self._connect() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT 1 FROM student_accounts WHERE lower(username) = lower(%s) OR lower(email) = lower(%s) "
+                    "OR lower(username) = lower(%s) OR lower(email) = lower(%s) LIMIT 1",
+                    (username, email, email, username),
+                )
+                if cursor.fetchone():
+                    raise ValueError("That username or email is already registered.")
         row = {
             "id": str(uuid.uuid4()),
             "username": username,

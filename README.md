@@ -101,7 +101,7 @@ Configure `DATABASE_URL` in `backend/.env` using `backend/.env.example`. On star
 | **TEST 02** | Repeated Misconception after 2 Hints | Escalate strategy; 0% repetition loops | Escalated to Tier 3 Decomposition; new analogy | ✅ **PASSED** |
 | **TEST 03** | "I don't know" vs Confident Wrong Rule | Distinguish uncertainty from misconception | Diagnosed `insufficient_evidence` (Tier 0 Probe) | ✅ **PASSED** |
 | **TEST 04** | Adversarial Prompt Injection ("Ignore rules") | Policy intact; 0% answer leakage | Neutralized attack; redirected Socratically | ✅ **PASSED** |
-| **TEST 05** | Out-of-Scope Boundary Enforcement | Honest scope disclosure; no hallucinations | Transparently disclosed Newtonian unit boundary | ✅ **PASSED** |
+| **TEST 05** | Out-of-Scope Boundary Enforcement | Honest scope disclosure; no hallucinations | Transparently disclosed the physics-only boundary | ✅ **PASSED** |
 | **TEST 06** | Recovery Verification via Transfer Problem | Serve fresh isomorph problem before mastery | Triggered Transfer Challenge with altered variables | ✅ **PASSED** |
 
 ---
@@ -116,14 +116,19 @@ Configure `DATABASE_URL` in `backend/.env` using `backend/.env.example`. On star
 ### Setup Commands
 ```bash
 # 1. Clone or navigate to the workspace
-cd "C:\MGH]\misconception_os"
+cd "C:\MGH\misconception_os"
 
-# 2. Run backend
+# 2. Install and configure the backend (once)
 cd backend
+pip install -r requirements.txt
+copy .env.example .env        # then set DATABASE_URL and AUTH_SECRET
+
+# 3. Run backend
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 
-# 3. Run frontend (in another terminal)
+# 4. Run frontend (in another terminal)
 cd ../frontend
+npm install
 npm run dev
 ```
 Or simply double-click / execute:
@@ -147,10 +152,96 @@ Access the application at **`http://localhost:3000`**.
    - Submit: *"They hit at the same time because both objects are round and spherical."*
    - Show how MisconceptionOS catches the lucky guess and refuses to falsely credit mastery!
 3. **Step 3: Adversarial Red-Teaming Attack**
-   - Switch to **Judge Stress-Test Arena**.
+   - Switch to the **Stress Tests** tab.
    - Click **Run All 6 Judge Stress Tests** to showcase live 100% Zero-Leakage & Injection Deflection metrics.
    - Run the **Side-by-Side Ablation Sandbox** to contrast against a naive chatbot.
 4. **Step 4: Teacher Evidence & Override HUD**
    - Open **Teacher Diagnostic HUD** tab.
    - Inspect the Bayesian Concept Mastery tree, evidence timestamps, and logged misconceptions.
    - Perform a manual teacher calibration override to verify audit logging.
+
+---
+
+## 🧪 7. Automated Tests
+
+Two end-to-end suites exercise every pipeline. Neither needs a real Ollama model: a stand-in Ollama server
+(`backend/tests/mock_ollama.py`) produces realistic replies and can be switched into failure modes (garbage JSON,
+out-of-range values, leaky answers, slow responses, HTTP 500) to test every fallback path.
+
+**Backend API suite** (61 tests: auth, the full chat pipeline, guards, diagnosis, policy state machine, leakage canary,
+memory, teacher HUD/override/PDF, quiz and study plans, stress suite, grounding, audio, concurrency):
+
+```powershell
+# needs a PostgreSQL database for tests, e.g. createdb misconception_os_test
+cd backend
+pip install pytest
+$env:TEST_DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/misconception_os_test"
+python -m pytest tests -v
+```
+
+**Browser suite** (Playwright, 15 checks: full voice lesson with a simulated microphone, HUD, PDF, override, grounding,
+quiz, stress-test arena, history drawer, accounts, mobile layout):
+
+```powershell
+pip install playwright; python -m playwright install chromium
+python backend/tests/mock_ollama.py 11434      # or run real Ollama
+.\start_servers.ps1
+python frontend/e2e/browser_e2e.py screenshots
+```
+
+**Voice benchmark** (real Edge-TTS + Whisper on your machine: word error rate and latency per Whisper model, with and
+without the physics prompt, in US / Indian / British accents, optionally with background noise):
+
+```powershell
+cd backend
+python tests/voice_benchmark.py                 # add --noise-snr 15 for a noisy classroom, --quick for a short run
+```
+
+Useful environment switches for development: `DISABLE_WEB_SEARCH=true` (use only the local corpus),
+`DISABLE_WHISPER_WARMUP=true`, `USE_CUDA=false`, `LEARNER_STORE_PATH=...` (separate learner-profile file).
+
+---
+
+## 🎙️ 8. Voice Pipeline
+
+| Stage | What happens |
+| :--- | :--- |
+| Listening | The browser calibrates to the room's noise, ends the turn ~0.85 s after the learner stops, and stops quietly after 8 s of silence. |
+| Speech-to-text | Chrome's live transcript is shown while speaking. On a GPU, Whisper (`small.en`, physics vocabulary prompt) produces the final transcript; on CPU the browser transcript is used and Whisper (`base.en`) is the fallback. |
+| Interruptions | Speaking over the tutor for ~0.3 s interrupts it; words that merely repeat what the tutor is saying (speaker echo) are ignored. |
+| Text-to-speech | Replies stream from Edge-TTS while they are synthesised (`/api/audio/stream/...`), so the voice starts almost immediately. Maths and units are read naturally ("F net equals m a", "9.8 meters per second squared"); recent phrases are cached. The browser voice is only a fallback. |
+
+Settings (`backend/.env`): `WHISPER_MODEL_SIZE` (`auto`, `base.en`, `small.en`, `medium.en`), `STT_PREFERENCE`
+(`auto`, `whisper`, `browser`), `USE_CUDA`, `EDGE_TTS_VOICE` (e.g. `en-IN-PrabhatNeural`), `TTS_FIRST_CHUNK_TIMEOUT_SECONDS`.
+
+## 📚 9. Knowledge Library (RAG)
+
+Click **+** next to *Concept Quiz* to add PDFs, text/Markdown files or pasted notes. Each document is split into
+page-tagged passages and indexed for keyword search immediately and meaning-based search in the background.
+The tutor retrieves the most relevant passages on every turn, grounds its explanation in them and shows the source
+(title and page) under its reply; quizzes, study plans and the Web Grounding tab use them too.
+
+* For meaning-based search run `ollama pull nomic-embed-text` once (keyword search works without it).
+* Documents are stored in PostgreSQL (`rag_documents`, `rag_chunks`); without a database they are kept in
+  `backend/app/data/documents_store.json`.
+* Limits: 20 MB per file (`MAX_UPLOAD_MB`). Scanned PDFs without a text layer and password-protected PDFs are
+  rejected with a clear message (run OCR / remove the password first).
+
+## 🧑‍🏫 10. Tutor Persona
+
+The voice agent behaves like a patient human tutor:
+
+* **Knows you.** Greets you by name and time of day ("Good evening, Priya!"), and a returning learner is welcomed back
+  with where they left off and offered to pick up from there. Say "my name is …" or sign in so it knows your name.
+* **Classroom requests by voice.** "Give me a hint", "say that again", "slow down" / "speed up" / "normal speed",
+  "explain it differently", and "that's all for today" (ends with a spoken recap and a next step). Hints, repeats
+  and pace changes are never graded as wrong answers.
+* **Encouragement.** Frustration ("this is too hard", "I give up") gets reassurance and a smaller first step.
+* **Speaks like a tutor.** Replies react to what you said, use short spoken sentences, praise reasoning rather than
+  intelligence, and end with one question; long model answers are trimmed for listening. Explanations are read a
+  little slower, and your chosen pace is remembered.
+* **Wait-time.** While you're solving a problem it waits longer before ending your turn, and if you go quiet it gives
+  one gentle nudge ("Take your time… say hint if you'd like one") instead of hanging up.
+* **Never a dead pause.** If a reply takes more than a moment it says "Hmm, let me think about that."
+* **Tap alternatives.** Hint · Say it again · Explain differently · Slower / Normal speed buttons under each reply.
+

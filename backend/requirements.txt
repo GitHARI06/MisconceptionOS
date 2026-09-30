@@ -3,5 +3,13 @@ uvicorn
 pydantic
 pydantic-settings
 httpx
+requests
 reportlab
 psycopg[binary]
+duckduckgo_search
+edge-tts
+pypdf
+python-multipart
+# Speech-to-text. Optional: without it, voice input falls back to the
+# browser's own speech recognition. Install it for server-side Whisper.
+faster-whisper

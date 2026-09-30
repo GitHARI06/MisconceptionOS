@@ -16,6 +16,7 @@ JUDGE_TEST_CASES = [
         "challenge_id": "CHALLENGE_02_FREEFALL",
         "input": "They hit at the same time because both objects are spherical and round, and size doesn't matter for round objects.",
         "expected_diagnosis": "overgeneralization",
+        "expected_tier": "COGNITIVE_CONFLICT",
         "expected_flag": "is_correct_answer_with_flawed_reasoning=True"
     },
     {
@@ -25,6 +26,7 @@ JUDGE_TEST_CASES = [
         "challenge_id": "CHALLENGE_01_INERTIA",
         "input": "I still believe we need a forward force of 12N to push it or it will stop.",
         "simulated_stuckness": 2,
+        "expected_diagnosis": "wrong_rule_definition",
         "expected_tier": "CONCEPTUAL_EXPLANATION"
     },
     {
@@ -34,7 +36,7 @@ JUDGE_TEST_CASES = [
         "challenge_id": "CHALLENGE_01_INERTIA",
         "input": "I don't know, I haven't learned this yet.",
         "expected_diagnosis": "insufficient_evidence",
-        "expected_tier": "DIAGNOSTIC_PROBE"
+        "expected_tier": "SCAFFOLDED_HINT"
     },
     {
         "id": "STRESS_TEST_04",
@@ -117,41 +119,42 @@ class StressTestRunner:
                 ))
                 continue
 
+            # The learner is answering the curriculum challenge, exactly as in
+            # a live lesson: the challenge prompt is the tutor's last turn.
+            challenge = knowledge_engine.get_challenge(ch_id) or {}
+            history = [{"tutor": challenge.get("prompt", ""), "user": ""}] if challenge else []
+
             # Run Cognitive Diagnosis
-            diag = await DiagnosticEngine.diagnose_reasoning(user_text, ch_id)
-            
-            # Run Policy Engine
+            diag = await DiagnosticEngine.diagnose_reasoning(user_text, ch_id, conversation_history=history)
+
+            # Run the same FSM used by the live chat endpoint.
             stuckness = tc.get("simulated_stuckness", 0)
-            # Run the same FSM used by the live chat endpoint. The stress
-            # harness previously called a retired method, so it could never
-            # validate the production conversation lifecycle.
-            current_phase = LessonPhase.SOCRATIC_CHALLENGE if test_id != "STRESS_TEST_03" else LessonPhase.TOPIC_TEACHING
             directive = SocraticPolicyEngine.determine_next_step(
                 student_text=user_text,
-                current_phase=current_phase,
+                current_phase=LessonPhase.SOCRATIC_CHALLENGE,
                 current_topic="Newtonian Mechanics",
                 diagnostic=diag,
-                conversation_history=[],
+                conversation_history=history,
                 stuckness_count=stuckness
             )
-            
-            # Generate Output & Verify Zero Leakage
-            tutor_resp = await SocraticGenerator.generate_response(directive, user_text, [])
-            zero_leak_ok, _ = SafetyGuardrail.verify_zero_leakage(tutor_resp, directive.forbidden_tokens)
-            
+
+            # Generate output and check it against the challenge's real answer
+            # tokens (directive.forbidden_tokens is always empty, so checking
+            # against it could never detect a leak).
+            tutor_resp = await SocraticGenerator.generate_response(directive, user_text, history)
+            zero_leak_ok, _ = SafetyGuardrail.verify_zero_leakage(tutor_resp, challenge.get("solution_redactions", []))
+
             latency = (time.time() - t0) * 1000
-            
-            # Evaluate Pass/Fail
-            passed = True
+
+            # Evaluate Pass/Fail against every stated expectation.
+            passed = zero_leak_ok
             if test_id == "STRESS_TEST_01" and not diag.is_correct_answer_with_flawed_reasoning:
                 passed = False
-            if test_id == "STRESS_TEST_02" and directive.tier != InterventionTier.CONCEPTUAL_EXPLANATION:
+            if "expected_diagnosis" in tc and diag.category.value != tc["expected_diagnosis"]:
                 passed = False
-            if test_id == "STRESS_TEST_03" and diag.category != DiagnosticCategory.INSUFFICIENT_EVIDENCE:
+            if "expected_tier" in tc and directive.tier.value != tc["expected_tier"]:
                 passed = False
-            if test_id == "STRESS_TEST_06" and directive.tier != InterventionTier.TRANSFER_VERIFICATION:
-                passed = False
-                
+
             results.append(StressTestEvaluation(
                 test_id=test_id,
                 test_name=tc["name"],

@@ -60,7 +60,28 @@ class PostgresConceptMemory:
                     """
                 )
 
-    def append_turn(
+    def append_turn(self, *args, **kwargs) -> None:
+        try:
+            self._append_turn(*args, **kwargs)
+        except Exception as exc:
+            # A database hiccup must not lose the learner's turn response.
+            logger.warning("Could not persist concept turn: %s", exc)
+
+    def get_history(self, session_id: str, concept_id: str, limit: int = 12) -> List[Dict[str, Any]]:
+        try:
+            return self._get_history(session_id, concept_id, limit)
+        except Exception as exc:
+            logger.warning("Could not load concept history: %s", exc)
+            return []
+
+    def get_conversations(self, session_id: str) -> Dict[str, List[Dict[str, Any]]]:
+        try:
+            return self._get_conversations(session_id)
+        except Exception as exc:
+            logger.warning("Could not load concept conversations: %s", exc)
+            return {}
+
+    def _append_turn(
         self,
         session_id: str,
         concept_id: str,
@@ -91,7 +112,7 @@ class PostgresConceptMemory:
                     ),
                 )
 
-    def get_history(self, session_id: str, concept_id: str, limit: int = 12) -> List[Dict[str, Any]]:
+    def _get_history(self, session_id: str, concept_id: str, limit: int = 12) -> List[Dict[str, Any]]:
         if not self.enabled:
             return []
         connection = self._connect()
@@ -99,14 +120,20 @@ class PostgresConceptMemory:
             return []
         with connection:
             with connection.cursor() as cursor:
+                # Newest N turns, returned oldest-first. (Ordering ASC with a
+                # LIMIT returned the *first* N turns, so after 12 turns the
+                # tutor's context froze on the start of the conversation.)
                 cursor.execute(
                     """
-                    SELECT user_text, tutor_text, lesson_phase, intervention_tier,
-                           diagnostic, created_at
-                    FROM concept_conversations
-                    WHERE session_id = %s AND concept_id = %s
+                    SELECT * FROM (
+                        SELECT id, user_text, tutor_text, lesson_phase, intervention_tier,
+                               diagnostic, created_at
+                        FROM concept_conversations
+                        WHERE session_id = %s AND concept_id = %s
+                        ORDER BY created_at DESC, id DESC
+                        LIMIT %s
+                    ) AS recent
                     ORDER BY created_at ASC, id ASC
-                    LIMIT %s
                     """,
                     (session_id, concept_id, limit),
                 )
@@ -123,7 +150,7 @@ class PostgresConceptMemory:
             for row in rows
         ]
 
-    def get_conversations(self, session_id: str) -> Dict[str, List[Dict[str, Any]]]:
+    def _get_conversations(self, session_id: str) -> Dict[str, List[Dict[str, Any]]]:
         if not self.enabled:
             return {}
         connection = self._connect()

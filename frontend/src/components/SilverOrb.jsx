@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-export const SilverOrb = ({ state, onClick, size = 260 }) => {
+export const SilverOrb = ({ state, onClick, size = 260, label = 'Talk to the tutor' }) => {
   // state: 'idle' | 'listening' | 'thinking' | 'speaking'
   const canvasRef = useRef(null);
 
@@ -198,7 +198,16 @@ export const SilverOrb = ({ state, onClick, size = 260 }) => {
   return (
     <div
       onClick={onClick}
-      className="relative flex items-center justify-center cursor-pointer select-none group transition-transform duration-300 hover:scale-105 active:scale-95"
+      role="button"
+      tabIndex={0}
+      aria-label={label}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onClick?.();
+        }
+      }}
+      className="relative flex items-center justify-center cursor-pointer select-none group transition-transform duration-300 hover:scale-105 active:scale-95 rounded-full focus:outline-none focus-visible:ring-4 focus-visible:ring-cyan-400/60"
       style={{ width: size, height: size }}
     >
       <canvas

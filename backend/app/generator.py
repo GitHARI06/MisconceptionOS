@@ -1,5 +1,7 @@
+import asyncio
 import json
 import logging
+import re
 import requests
 from typing import Dict, Any, Optional, List
 from .models import SocraticDirective, InterventionTier, LessonPhase
@@ -19,7 +21,7 @@ Recent Dialogue History:
 
 Student's Latest Response:
 "{student_text}"
-
+{reference_block}
 Guidelines by Phase:
 1. IF `TOPIC_TEACHING`:
    - Infer the exact physics concept the learner requested, even if it is not a named topic in a curriculum list.
@@ -38,6 +40,7 @@ Guidelines by Phase:
    - Celebrate their correct insight ("Spot on! Exactly right!"), explain WHY, and present a fresh isomorphic scenario.
 
 Tone: Warm, conversational, intellectually stimulating (under 3-4 sentences).
+{style_block}
 
 Conversation-quality rules:
 - Answer the student's exact latest question first; do not substitute a generic topic summary.
@@ -45,6 +48,8 @@ Conversation-quality rules:
 - If the student asks for another example, give a genuinely different, concrete example than the previous one.
 - Vary wording naturally. Never repeat a previous tutor response verbatim or use filler such as "identify the physical quantities involved" unless it directly answers the question.
 - Stay within physics, explain uncertainty honestly, and ask one useful follow-up question.
+- When reference material from the learner's uploaded documents is provided, ground your explanation in it and mention the source in brackets, e.g. [Lecture notes, p.3]. If it does not cover the question, rely on your own physics knowledge and do not invent citations.
+- While the learner is working on a challenge, use the reference material for hints only; never quote a final answer from it.
 - Physics is broad: reason about mechanics, thermodynamics, fluids, waves, optics, electricity, magnetism, relativity, quantum, atomic, nuclear, astrophysics, and unfamiliar subtopics.
 
 Generate your teacher response:"""
@@ -54,7 +59,8 @@ class SocraticGenerator:
     def _deterministic_response(
         directive: SocraticDirective,
         student_text: str,
-        conversation_history: List[Dict[str, Any]]
+        conversation_history: List[Dict[str, Any]],
+        reference_hits: Optional[List[Dict[str, Any]]] = None,
     ) -> str:
         text_lower = student_text.lower().strip()
         topic_lower = directive.topic.lower()
@@ -66,6 +72,21 @@ class SocraticGenerator:
 
         if directive.lesson_phase == LessonPhase.GREETING:
             return "Good morning, welcome to learning. What shall we learn today?"
+
+        # Offline, the learner's own notes are the best explanation we have
+        # for teaching and doubt turns.
+        if reference_hits and directive.lesson_phase in (LessonPhase.TOPIC_TEACHING, LessonPhase.RESOLVING_DOUBT):
+            hit = reference_hits[0]
+            sentences = re.split(r"(?<=[.!?])\s+", hit["text"].strip())
+            excerpt = " ".join(sentences[:3]).strip()
+            if len(excerpt) > 420:
+                excerpt = excerpt[:420].rsplit(" ", 1)[0] + "…"
+            closing = (
+                "Do you have any doubts about this, or are you ready to test your understanding?"
+                if directive.lesson_phase == LessonPhase.TOPIC_TEACHING
+                else "Did that answer your question, or would you like another example?"
+            )
+            return f"Here is what your material says [{hit['title']}, p.{hit['page']}]: {excerpt}\n\n{closing}"
 
         # Phase 1: TOPIC TEACHING
         if directive.lesson_phase == LessonPhase.TOPIC_TEACHING:
@@ -195,7 +216,7 @@ class SocraticGenerator:
                         "It says the acceleration points in the direction of the net force and grows when the force increases or the mass decreases. "
                         "Can you tell me which force is unbalanced in the situation you have in mind?"
                     )
-            elif "example" in text_lower or "another" in text_lower:
+            elif any(k in text_lower for k in ["example", "another", "differently", "don't get", "dont get", "simpler"]):
                 return (
                     f"Here is a concrete example of {directive.topic}: imagine a familiar system changing from one state to another. "
                     "Track the quantities entering and leaving the system, then ask which physical law explains that change. "
@@ -220,50 +241,93 @@ class SocraticGenerator:
                     "A hockey puck is gliding across completely frictionless ice at a constant velocity of 12 m/s. Does it require a continuous forward force of 12 N to keep moving at that speed? Explain why or why not."
                 )
 
-        # Phase 4: SOCRATIC SCAFFOLDING / "I don't know" / Misconceptions
-        idk_keywords = ["don't know", "dont know", "no idea", "not sure", "confused", "sorry"]
-        if any(k in text_lower for k in idk_keywords):
-            if "coffee" in last_tutor_turn or "thermodynamics" in topic_lower:
+        thermo_context = (
+            any(k in last_tutor_turn for k in ["coffee", "boil", "refrigerator", "ice cube"])
+            or "thermodynamic" in topic_lower
+        )
+
+        # Recovery verified after a successful transfer problem.
+        if directive.lesson_phase == LessonPhase.DOUBT_CHECK:
+            return (
+                f"Excellent work! You applied the same principle to a brand-new situation, so your understanding of {directive.topic} is now verified. "
+                "Would you like a harder challenge, or shall we explore a new topic?"
+            )
+
+        # Sound reasoning: affirm and serve a fresh transfer problem.
+        if directive.lesson_phase == LessonPhase.TRANSFER_CHECK:
+            if thermo_context:
+                return (
+                    "Spot on! That's exactly right: according to the Second Law of Thermodynamics, heat flows spontaneously only from higher to lower temperature. "
+                    "\n\nNow, here is a transfer question: How does a household refrigerator manage to cool its interior by moving heat from inside to the hotter room?"
+                )
+            return (
+                "Spot on! With the velocity constant, the acceleration is zero, so Newton's First Law tells us nothing needs to push the puck along. "
+                "\n\nNow, here is a transfer question: If Voyager 1 cruises through deep space at 38,000 mph with its engines shut down, does its speed change over time?"
+            )
+
+        # "I don't know": empathetic, smaller sub-step.
+        if directive.tier == InterventionTier.SCAFFOLDED_HINT:
+            if thermo_context:
                 return (
                     "No worries at all, that's completely okay! Let's think about everyday intuition: "
                     "Have you ever seen a cold cup of water on a table heat up all by itself and boil, or does heat always spread out into cooler surroundings? "
-                    "Which direction does heat naturally flow according to the Second Law?"
+                    "Which direction does heat naturally flow?"
                 )
-            else:
+            return (
+                "No worries at all, that's completely okay! Let's break it down: "
+                "on ordinary ice a sliding puck slowly stops. What is doing the stopping, and is that thing still there on perfectly frictionless ice?"
+            )
+
+        # Stuck after repeated hints: escalate to a clear decomposition.
+        if directive.tier == InterventionTier.CONCEPTUAL_EXPLANATION:
+            if thermo_context:
                 return (
-                    "No worries at all, that's completely okay! Let's break it down: "
-                    "Remember Newton's First Law: an object in motion stays in motion unless an external force acts on it. "
-                    "If there is zero friction on the ice, does anything resist or slow down the puck?"
+                    "Let's slow down and build it step by step. Step 1: heat is energy moving because of a temperature difference. "
+                    "Step 2: on its own it always moves from the hotter body to the colder one, never the reverse. "
+                    "Step 3: the room is at 20°C and the coffee is hotter. So which way can energy flow on its own, and could that ever make the coffee boil?"
                 )
-
-        # Correct response on coffee / thermodynamics
-        if ("cannot" in text_lower or "can't" in text_lower or "no" in text_lower or "second law" in text_lower or "entropy" in text_lower) and ("coffee" in last_tutor_turn or "boil" in last_tutor_turn):
             return (
-                "Spot on! That's exactly right—according to the Second Law of Thermodynamics, heat flows spontaneously only from higher to lower temperature. Reversing this would decrease total entropy without external work! "
-                "\n\nNow, here is a transfer question: How does a household refrigerator manage to cool its interior by moving heat from inside to the hotter room?"
+                "Let's build this step by step. Step 1: Newton's First Law says an object's velocity changes only when an unbalanced force acts on it. "
+                "Step 2: on normal ice, friction is the unbalanced force that slows a puck. "
+                "Step 3: on frictionless ice that friction is gone. With nothing left to change its velocity, what happens to the puck's speed?"
             )
 
-        # Correct response on inertia
-        if ("no force" in text_lower or "0" in text_lower or "zero" in text_lower or "inertia" in text_lower or "first law" in text_lower) and ("puck" in last_tutor_turn or "frictionless" in last_tutor_turn):
-            return (
-                "Spot on! That's exactly right—Newton's First Law (Inertia) states that zero net force is required to sustain constant velocity on a frictionless surface. "
-                "\n\nNow, here is a transfer question: If Voyager 1 cruises through deep space at 38,000 mph with engines shut down, does its speed change over time?"
-            )
-
-        # Default Socratic Probe
-        return (
-            "Let's explore that thought together! If you examine the governing law for this system, "
-            "what does the fundamental principle state about how energy or forces must behave?"
-        )
+        # Misconception: cognitive conflict via a counter-example. Rotate the
+        # example so the learner never gets the same text twice in a row.
+        if thermo_context:
+            examples = [
+                "Let's test that idea. Picture an ice cube on a table in a 20°C room. Have you ever seen the ice get colder while the room warms up? What does that tell you about the direction heat flows on its own?",
+                "Here's a puzzle: a refrigerator needs to be plugged in to move heat out of its cold interior. If heat could flow from cold to hot by itself, why would it need electricity at all?",
+            ]
+        else:
+            examples = [
+                "Let's test that idea with a thought experiment. Voyager 1 has been coasting through deep space for decades with its engines off. Nothing is pushing it, yet it keeps moving. How does that fit with your idea that motion needs a push?",
+                "Try this: slide a book across a carpet, then across a polished floor, then imagine a surface with no friction at all. How does the distance it travels change, and what would happen on the perfect surface?",
+            ]
+        for example in examples:
+            if example.lower() != last_tutor_turn:
+                return example
+        return examples[0]
 
     @classmethod
     async def generate_response(
         cls,
         directive: SocraticDirective,
         student_text: str,
-        conversation_history: List[Dict[str, Any]] = []
+        conversation_history: List[Dict[str, Any]] = [],
+        reference_hits: Optional[List[Dict[str, Any]]] = None,
+        profile=None,
+        affect: Optional[str] = None,
     ) -> str:
+        from . import tutor_persona as persona
         raw_output = None
+        reference_block = ""
+        if reference_hits:
+            from .document_store import format_references
+            reference_block = (
+                "\nReference material from the learner's uploaded documents:\n"
+                + format_references(reference_hits) + "\n"
+            )
         context_str = ""
         for turn in conversation_history[-3:]:
             context_str += f"Tutor: {turn.get('tutor', '')}\nStudent: {turn.get('user', '')}\n"
@@ -281,10 +345,15 @@ class SocraticGenerator:
                 topic=directive.topic,
                 pedagogical_goal=directive.pedagogical_goal,
                 dialogue_context=context_str if context_str else "Session just started.",
-                student_text=student_text
+                student_text=student_text,
+                reference_block=reference_block,
+                style_block=persona.style_block(profile, affect),
             )
 
-            res = requests.post(
+            # Blocking HTTP call in a worker thread: keeps the server
+            # responsive for other learners while the model is thinking.
+            res = await asyncio.to_thread(
+                requests.post,
                 f"{settings.OLLAMA_BASE_URL}/api/generate",
                 json={
                     "model": settings.OLLAMA_MODEL,
@@ -320,8 +389,14 @@ class SocraticGenerator:
                 logger.info("Rejecting repetitive or generic local tutor response; using contextual fallback.")
                 raw_output = None
 
-        if not raw_output:
-            raw_output = cls._deterministic_response(directive, student_text, conversation_history)
+        if raw_output:
+            # Written to be heard: long model answers are cut down to their
+            # opening and the question that hands the turn back.
+            raw_output = persona.fit_for_voice(raw_output)
+        elif affect == "frustration":
+            raw_output = persona.frustration_fallback(directive.topic, f"{student_text}:{len(conversation_history)}")
+        else:
+            raw_output = cls._deterministic_response(directive, student_text, conversation_history, reference_hits)
 
         # Zero-Leakage Canary Scan
         passed, verified_output = SafetyGuardrail.verify_zero_leakage(raw_output, directive.forbidden_tokens)
