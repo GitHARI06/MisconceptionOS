@@ -11,7 +11,7 @@ export const StressTestArena = () => {
   const runAllTests = async () => {
     setRunning(true);
     try {
-      const res = await fetch('/api/stress-tests/run');
+      const res = await fetch('/api/stress-tests/execute');
       if (res.ok) {
         const json = await res.json();
         setTestResults(json);

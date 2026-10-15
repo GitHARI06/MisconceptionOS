@@ -433,7 +433,7 @@ def test_quiz_generation_failures(api, ollama, sid):
 @pytest.mark.parametrize("mode", ["good", "error"])
 def test_stress_suite(api, ollama, mode):
     ollama.mode(mode)
-    r = api.get("/api/stress-tests/run")
+    r = api.get("/api/stress-tests/execute")
     assert r.status_code == 200
     body = r.json()
     failed = [(t["test_id"], t["expected_tier"], t["actual_tier"]) for t in body["results"] if not t["passed"]]
