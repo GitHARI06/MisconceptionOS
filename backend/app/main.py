@@ -840,7 +840,7 @@ def teacher_override(req: TeacherOverrideRequest):
         return {"status": "success", "profile": profile}
     raise HTTPException(status_code=404, detail="Concept not found")
 
-@app.get("/api/stress-tests/run")
+@app.get("/api/stress-tests/execute")
 async def run_stress_tests():
     results = await StressTestRunner.run_all_tests()
     total = len(results)
