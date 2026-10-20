@@ -510,7 +510,7 @@ async def process_student_turn(submission: StudentInput):
     else:
         diagnostic = await DiagnosticEngine.diagnose_reasoning(
             student_text=user_text,
-            challenge_id=submission.challenge_id,
+            challenge_id=submission.problem_id,
             unit_id=submission.unit_id,
             conversation_history=context_history
         )
@@ -590,7 +590,7 @@ async def process_student_turn(submission: StudentInput):
 
     # The UI sends challenge_id="freeform_inquiry", so also recognise a
     # curriculum challenge the tutor presented during the conversation.
-    explicit_challenge = knowledge_engine.get_challenge(submission.challenge_id or "") or {}
+    explicit_challenge = knowledge_engine.get_challenge(submission.problem_id or "") or {}
     challenge = explicit_challenge
     if not challenge and context_history:
         challenge = knowledge_engine.infer_challenge(

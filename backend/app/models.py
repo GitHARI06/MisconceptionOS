@@ -29,7 +29,7 @@ class InterventionTier(str, Enum):
 
 class StudentInput(BaseModel):
     session_id: str
-    challenge_id: Optional[str] = "freeform_inquiry"
+    problem_id: Optional[str] = "freeform_inquiry"
     unit_id: Optional[str] = "physics_mechanics"
     text: Optional[str] = None
     audio_base64: Optional[str] = None
