@@ -245,3 +245,5 @@ The voice agent behaves like a patient human tutor:
 * **Never a dead pause.** If a reply takes more than a moment it says "Hmm, let me think about that."
 * **Tap alternatives.** Hint · Say it again · Explain differently · Slower / Normal speed buttons under each reply.
 
+
+<!-- Meld beta test: a docs-only change. -->
