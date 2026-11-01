@@ -346,7 +346,7 @@ async def start_tutoring_session(payload: SessionStart):
     }
 
 
-@app.post("/api/chat/turn", response_model=SocraticTurnResult)
+@app.post("/api/chat/step", response_model=SocraticTurnResult)
 async def process_student_turn(submission: StudentInput):
     session_id = submission.session_id or str(uuid.uuid4())
     browser_text = (submission.text or "").strip()
